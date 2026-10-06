@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../offers/presentation/pages/driver_offers_page.dart';
 
 class RideOptionsPage extends StatefulWidget {
   const RideOptionsPage({super.key, required this.destination});
@@ -184,46 +185,70 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
   }
 
   void _showSearching(BuildContext context) {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      backgroundColor: const Color(0xFFFFFBF5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      builder: (_) => const SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24, 26, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 38,
-                height: 38,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: Color(0xFFB98B52),
-                ),
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(.32),
+      builder: (dialogContext) {
+        Future.delayed(const Duration(milliseconds: 1800), () {
+          if (!dialogContext.mounted) return;
+          Navigator.pop(dialogContext);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DriverOffersPage(
+                destination: widget.destination,
+                vehicleType: selected,
               ),
-              SizedBox(height: 18),
-              Text(
-                'بندور على كباتن قريبين منك...',
-                textDirection: TextDirection.rtl,
-                style: TextStyle(
-                  color: Color(0xFF171817),
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              SizedBox(height: 7),
-              Text(
-                'هتظهرلك العروض وتختار الأنسب ليك.',
-                textDirection: TextDirection.rtl,
-                style: TextStyle(color: Color(0xFF817A70), fontSize: 12),
-              ),
-            ],
+            ),
+          );
+        });
+
+        return Dialog(
+          backgroundColor: const Color(0xFFFFFBF5),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 42),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
           ),
-        ),
-      ),
+          child: const Padding(
+            padding: EdgeInsets.fromLTRB(24, 28, 24, 26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 42,
+                  height: 42,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Color(0xFFB98B52),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'بندور على كباتن قريبين منك...',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF171817),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(height: 7),
+                Text(
+                  'ثواني وهتظهرلك العروض المتاحة',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF817A70),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
