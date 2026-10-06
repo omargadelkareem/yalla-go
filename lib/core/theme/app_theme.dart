@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 abstract final class AppTheme {
@@ -18,7 +19,7 @@ abstract final class AppTheme {
         surface: AppColors.charcoal,
       ),
       scaffoldBackgroundColor: AppColors.charcoal,
-      fontFamily: 'sans-serif',
+      fontFamily: GoogleFonts.cairo().fontFamily,
       splashFactory: InkSparkle.splashFactory,
       textTheme: const TextTheme(
         displayLarge: TextStyle(
