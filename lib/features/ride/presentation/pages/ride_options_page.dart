@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 import '../../../offers/presentation/pages/driver_offers_page.dart';
 import '../../../offers/presentation/pages/no_drivers_page.dart';
@@ -26,8 +31,108 @@ class RideOptionsPage extends StatefulWidget {
 }
 
 class _RideOptionsPageState extends State<RideOptionsPage> {
+  final MapController mapController = MapController();
+
   String selected = 'motorcycle';
   bool simulateNoDrivers = false;
+  bool loadingRoute = true;
+  String? routeError;
+  double? distanceKm;
+  double? durationMinutes;
+  List<LatLng> routePoints = [];
+
+  double get motorcyclePrice =>
+      distanceKm == null ? 0 : (distanceKm! * 6.5).clamp(20, double.infinity);
+  double get carPrice =>
+      distanceKm == null ? 0 : (distanceKm! * 10).clamp(30, double.infinity);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoute();
+  }
+
+  Future<void> _loadRoute() async {
+    final pickupLat = widget.pickupLatitude;
+    final pickupLon = widget.pickupLongitude;
+    final destinationLat = widget.destinationLatitude;
+    final destinationLon = widget.destinationLongitude;
+
+    if (pickupLat == null ||
+        pickupLon == null ||
+        destinationLat == null ||
+        destinationLon == null) {
+      if (!mounted) return;
+      setState(() {
+        loadingRoute = false;
+        routeError = 'تعذر حساب المسافة: اختر نقطة بداية ووجهة محددتين على الخريطة.';
+      });
+      return;
+    }
+
+    try {
+      final coordinates =
+          '$pickupLon,$pickupLat;$destinationLon,$destinationLat';
+      final uri = Uri.parse(
+        'https://router.project-osrm.org/route/v1/driving/$coordinates'
+        '?overview=full&geometries=geojson&steps=false',
+      );
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        throw Exception('routing failed');
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (data['code'] != 'Ok') {
+        throw Exception('no route');
+      }
+      final routes = data['routes'] as List<dynamic>;
+      if (routes.isEmpty) throw Exception('no route');
+
+      final route = routes.first as Map<String, dynamic>;
+      final geometry = route['geometry'] as Map<String, dynamic>;
+      final coordinatesList = geometry['coordinates'] as List<dynamic>;
+      final points = coordinatesList.map((point) {
+        final pair = point as List<dynamic>;
+        return LatLng(
+          (pair[1] as num).toDouble(),
+          (pair[0] as num).toDouble(),
+        );
+      }).toList();
+
+      if (!mounted) return;
+      setState(() {
+        distanceKm = (route['distance'] as num).toDouble() / 1000;
+        durationMinutes = (route['duration'] as num).toDouble() / 60;
+        routePoints = points;
+        loadingRoute = false;
+        routeError = null;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || routePoints.isEmpty) return;
+        final bounds = LatLngBounds.fromPoints(routePoints);
+        mapController.fitCamera(
+          CameraFit.bounds(
+            bounds: bounds,
+            padding: const EdgeInsets.fromLTRB(42, 90, 42, 390),
+          ),
+        );
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        loadingRoute = false;
+        routeError = 'تعذر حساب الطريق حالياً. حاول مرة تانية.';
+      });
+    }
+  }
+
+  String _priceLabel(double value) {
+    if (loadingRoute) return '...';
+    if (routeError != null) return '--';
+    return '${value.ceil()} ج';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +141,71 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: CustomPaint(
-              painter: _RouteMapPainter(),
-              child: const SizedBox.expand(),
+            child: FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: LatLng(
+                  widget.pickupLatitude ?? 26.5569,
+                  widget.pickupLongitude ?? 31.6948,
+                ),
+                initialZoom: 13.5,
+                minZoom: 4,
+                maxZoom: 19,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.yalla_go',
+                  maxNativeZoom: 19,
+                ),
+                if (routePoints.isNotEmpty)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: routePoints,
+                        strokeWidth: 5,
+                        color: const Color(0xFFB98B52),
+                      ),
+                    ],
+                  ),
+                if (widget.pickupLatitude != null &&
+                    widget.pickupLongitude != null &&
+                    widget.destinationLatitude != null &&
+                    widget.destinationLongitude != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          widget.pickupLatitude!,
+                          widget.pickupLongitude!,
+                        ),
+                        width: 44,
+                        height: 44,
+                        child: const _MapPoint(
+                          icon: Icons.my_location_rounded,
+                          color: Color(0xFF171817),
+                        ),
+                      ),
+                      Marker(
+                        point: LatLng(
+                          widget.destinationLatitude!,
+                          widget.destinationLongitude!,
+                        ),
+                        width: 44,
+                        height: 44,
+                        child: const _MapPoint(
+                          icon: Icons.location_on_rounded,
+                          color: Color(0xFFB98B52),
+                        ),
+                      ),
+                    ],
+                  ),
+                RichAttributionWidget(
+                  attributions: const [
+                    TextSourceAttribution('OpenStreetMap contributors'),
+                  ],
+                ),
+              ],
             ),
           ),
           SafeArea(
@@ -57,22 +224,6 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                   ),
                 ),
               ),
-            ),
-          ),
-          const Positioned(
-            top: 175,
-            left: 74,
-            child: _MapPoint(
-              icon: Icons.my_location_rounded,
-              color: Color(0xFF171817),
-            ),
-          ),
-          const Positioned(
-            top: 335,
-            right: 72,
-            child: _MapPoint(
-              icon: Icons.location_on_rounded,
-              color: Color(0xFFB98B52),
             ),
           ),
           Align(
@@ -136,15 +287,25 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _TripSummary(pickup: widget.pickup, destination: widget.destination),
+                    _TripSummary(
+                      pickup: widget.pickup,
+                      destination: widget.destination,
+                      loading: loadingRoute,
+                      error: routeError,
+                      distanceKm: distanceKm,
+                      durationMinutes: durationMinutes,
+                      onRetry: _loadRoute,
+                    ),
                     const SizedBox(height: 12),
                     _RideCard(
                       selected: selected == 'motorcycle',
                       icon: Icons.two_wheeler_rounded,
                       title: 'موتوسيكل',
                       subtitle: 'الأسرع والأوفر',
-                      eta: '3 - 5 د',
-                      price: '38 ج',
+                      eta: durationMinutes == null
+                          ? '--'
+                          : '${durationMinutes!.ceil()} د',
+                      price: _priceLabel(motorcyclePrice),
                       onTap: () => setState(() => selected = 'motorcycle'),
                     ),
                     const SizedBox(height: 10),
@@ -153,8 +314,10 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       icon: Icons.directions_car_filled_rounded,
                       title: 'عربية',
                       subtitle: 'راحة أكتر في مشوارك',
-                      eta: '4 - 7 د',
-                      price: '60 ج',
+                      eta: durationMinutes == null
+                          ? '--'
+                          : '${durationMinutes!.ceil()} د',
+                      price: _priceLabel(carPrice),
                       onTap: () => setState(() => selected = 'car'),
                     ),
                     const SizedBox(height: 13),
@@ -204,7 +367,9 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       width: double.infinity,
                       height: 56,
                       child: FilledButton(
-                        onPressed: () => _showSearching(context),
+                        onPressed: loadingRoute || routeError != null
+                            ? null
+                            : () => _showSearching(context),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF171817),
                           foregroundColor: const Color(0xFFFFFBF5),
@@ -415,59 +580,24 @@ class _MapPoint extends StatelessWidget {
   }
 }
 
-class _RouteMapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final road = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = -3; i < 10; i++) {
-      final y = i * 85.0;
-      canvas.drawLine(
-        Offset(-40, y),
-        Offset(size.width + 50, y + 190),
-        road,
-      );
-    }
-
-    final route = Paint()
-      ..color = const Color(0xFFB98B52)
-      ..strokeWidth = 5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path()
-      ..moveTo(size.width * .23, 195)
-      ..cubicTo(
-        size.width * .35,
-        240,
-        size.width * .47,
-        290,
-        size.width * .60,
-        300,
-      )
-      ..cubicTo(
-        size.width * .70,
-        310,
-        size.width * .75,
-        335,
-        size.width * .78,
-        350,
-      );
-
-    canvas.drawPath(path, route);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
 class _TripSummary extends StatelessWidget {
-  const _TripSummary({required this.pickup, required this.destination});
+  const _TripSummary({
+    required this.pickup,
+    required this.destination,
+    required this.loading,
+    required this.error,
+    required this.distanceKm,
+    required this.durationMinutes,
+    required this.onRetry,
+  });
+
   final String pickup;
   final String destination;
+  final bool loading;
+  final String? error;
+  final double? distanceKm;
+  final double? durationMinutes;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -494,19 +624,73 @@ class _TripSummary extends StatelessWidget {
             color: const Color(0xFFB98B52),
           ),
           const SizedBox(height: 10),
-          const Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              Icon(Icons.route_rounded, size: 15, color: Color(0xFF817A70)),
-              SizedBox(width: 5),
-              Text('المسافة والوقت تقديريان حالياً',
-                textDirection: TextDirection.rtl,
-                style: TextStyle(color: Color(0xFF817A70), fontSize: 10)),
-              Spacer(),
-              Text('5.8 كم • 12 د',
-                style: TextStyle(color: Color(0xFF171817), fontSize: 11, fontWeight: FontWeight.w800)),
-            ],
-          ),
+          if (loading)
+            const Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFFB98B52),
+                  ),
+                ),
+                SizedBox(width: 7),
+                Text(
+                  'بنحسب أفضل طريق...',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(color: Color(0xFF817A70), fontSize: 10),
+                ),
+              ],
+            )
+          else if (error != null)
+            Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                const Icon(Icons.error_outline_rounded,
+                    size: 15, color: Color(0xFFB98B52)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    error!,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      color: Color(0xFF817A70),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: onRetry,
+                  child: const Text('إعادة'),
+                ),
+              ],
+            )
+          else
+            Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                const Icon(Icons.route_rounded,
+                    size: 15, color: Color(0xFF817A70)),
+                const SizedBox(width: 5),
+                const Text(
+                  'الطريق الفعلي',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(color: Color(0xFF817A70), fontSize: 10),
+                ),
+                const Spacer(),
+                Text(
+                  '${distanceKm!.toStringAsFixed(1)} كم • ${durationMinutes!.ceil()} د',
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    color: Color(0xFF171817),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
