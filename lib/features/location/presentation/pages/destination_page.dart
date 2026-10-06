@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../ride/presentation/pages/ride_options_page.dart';
 
@@ -13,6 +14,8 @@ class _DestinationPageState extends State<DestinationPage> {
   final pickupController = TextEditingController(text: 'موقعي الحالي - سوهاج');
   final destinationController = TextEditingController();
   bool editingPickup = false;
+  bool locating = false;
+  Position? currentPosition;
 
   final List<String> places = const [
     'جامعة سوهاج الجديدة',
@@ -39,6 +42,71 @@ class _DestinationPageState extends State<DestinationPage> {
     pickupController.dispose();
     destinationController.dispose();
     super.dispose();
+  }
+
+  Future<void> useCurrentLocation() async {
+    if (locating) return;
+    setState(() => locating = true);
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        _showLocationMessage('فعّل خدمة الموقع GPS وحاول مرة تانية.');
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        _showLocationMessage(
+          permission == LocationPermission.deniedForever
+              ? 'صلاحية الموقع مرفوضة نهائياً. فعّلها من إعدادات التطبيق.'
+              : 'لازم تسمح بالوصول للموقع علشان نحدد نقطة الانطلاق.',
+        );
+        return;
+      }
+
+      const settings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+      );
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: settings,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        currentPosition = position;
+        pickupController.text = 'موقعي الحالي';
+        editingPickup = false;
+      });
+      _showLocationMessage('تم تحديد موقعك الحالي بنجاح.');
+    } catch (_) {
+      if (!mounted) return;
+      _showLocationMessage('تعذر تحديد موقعك حالياً. حاول مرة تانية.');
+    } finally {
+      if (mounted) setState(() => locating = false);
+    }
+  }
+
+  void _showLocationMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      );
   }
 
   void selectPlace(String place) {
@@ -99,12 +167,20 @@ class _DestinationPageState extends State<DestinationPage> {
               shape: const CircleBorder(),
               elevation: 3,
               child: IconButton(
-                onPressed: () => setState(() {
-                  pickupController.text = 'موقعي الحالي - سوهاج';
-                  editingPickup = false;
-                }),
-                icon: const Icon(Icons.my_location_rounded,
-                    color: Color(0xFF171817)),
+                onPressed: locating ? null : useCurrentLocation,
+                icon: locating
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.3,
+                          color: Color(0xFFB98B52),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.my_location_rounded,
+                        color: Color(0xFF171817),
+                      ),
               ),
             ),
           ),
