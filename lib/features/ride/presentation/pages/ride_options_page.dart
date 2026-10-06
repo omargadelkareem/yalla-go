@@ -203,49 +203,21 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
             ),
           );
         });
-
         return Dialog(
           backgroundColor: const Color(0xFFFFFBF5),
           insetPadding: const EdgeInsets.symmetric(horizontal: 42),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(26),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
           child: const Padding(
             padding: EdgeInsets.fromLTRB(24, 28, 24, 26),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 42,
-                  height: 42,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Color(0xFFB98B52),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'بندور على كباتن قريبين منك...',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF171817),
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: 7),
-                Text(
-                  'ثواني وهتظهرلك العروض المتاحة',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF817A70),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(width:42,height:42,child:CircularProgressIndicator(strokeWidth:3,color:Color(0xFFB98B52))),
+              SizedBox(height:20),
+              Text('بندور على كباتن قريبين منك...',textDirection:TextDirection.rtl,textAlign:TextAlign.center,
+                style:TextStyle(color:Color(0xFF171817),fontSize:17,fontWeight:FontWeight.w800)),
+              SizedBox(height:7),
+              Text('ثواني وهتظهرلك العروض المتاحة',textDirection:TextDirection.rtl,textAlign:TextAlign.center,
+                style:TextStyle(color:Color(0xFF817A70),fontSize:12)),
+            ]),
           ),
         );
       },
