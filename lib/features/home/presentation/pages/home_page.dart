@@ -4,6 +4,7 @@ import '../../../location/presentation/pages/destination_page.dart';
 import '../../../history/presentation/pages/trip_history_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../support/presentation/pages/support_page.dart';
+import '../../../notifications/presentation/pages/notifications_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -40,7 +41,7 @@ class HomePage extends StatelessWidget {
               const Divider(color: Color(0xFFE7E0D6)),
               _DrawerItem(icon: Icons.history_rounded, label: 'رحلاتي', page: TripHistoryPage()),
               _DrawerItem(icon: Icons.person_outline_rounded, label: 'حسابي', page: ProfilePage()),
-              _DrawerItem(icon: Icons.notifications_none_rounded, label: 'الإشعارات'),
+              _DrawerItem(icon: Icons.notifications_none_rounded, label: 'الإشعارات', page: NotificationsPage()),
               _DrawerItem(icon: Icons.support_agent_rounded, label: 'المساعدة والدعم', page: SupportPage()),
               const Spacer(),
               const Padding(
