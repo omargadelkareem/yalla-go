@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/routes/app_routes.dart';
+import '../../../../core/session/rider_session.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'profile_setup_page.dart';
 
@@ -45,6 +46,12 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
       if (!mounted) return;
 
       if (snapshot.exists) {
+        final data = Map<String, dynamic>.from(snapshot.value as Map);
+        RiderSession.setUser(
+          key: normalizedPhone,
+          phoneNumber: (data['phone'] ?? phone).toString(),
+          riderName: (data['name'] ?? 'مستخدم Yalla Go').toString(),
+        );
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.home,
