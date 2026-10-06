@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../location/presentation/pages/destination_page.dart';
 import '../../../history/presentation/pages/trip_history_page.dart';
@@ -6,8 +7,106 @@ import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../support/presentation/pages/support_page.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool locating = true;
+  Position? currentPosition;
+  String locationText = 'جاري تحديد موقعك...';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _detectLocation());
+  }
+
+  Future<void> _detectLocation() async {
+    if (!mounted) return;
+    setState(() {
+      locating = true;
+      locationText = 'جاري تحديد موقعك...';
+    });
+
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        setState(() {
+          locating = false;
+          locationText = 'فعّل GPS لتحديد موقعك';
+        });
+        _showMessage('فعّل خدمة الموقع GPS ثم اضغط زر تحديد الموقع.');
+        return;
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        setState(() {
+          locating = false;
+          locationText = 'لم يتم السماح بالموقع';
+        });
+        _showMessage('اسمح بالوصول للموقع علشان Yalla Go يحدد نقطة الانطلاق.');
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        setState(() {
+          locating = false;
+          locationText = 'صلاحية الموقع موقوفة';
+        });
+        _showMessage('فعّل صلاحية الموقع من إعدادات التطبيق ثم حاول مرة تانية.');
+        return;
+      }
+
+      const settings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 0,
+      );
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: settings,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        currentPosition = position;
+        locating = false;
+        locationText = 'موقعك الحالي';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        locating = false;
+        locationText = 'تعذر تحديد الموقع';
+      });
+      _showMessage('تعذر تحديد موقعك حالياً. حاول مرة تانية.');
+    }
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +172,15 @@ class HomePage extends StatelessWidget {
             bottom: 280,
             child: _MapButton(
               icon: Icons.near_me_rounded,
-              onTap: () {},
+              onTap: _detectLocation,
             ),
           ),
-          const Align(
-            alignment: Alignment(0, -.05),
-            child: _CurrentLocation(),
+          Align(
+            alignment: const Alignment(0, -.05),
+            child: _CurrentLocation(
+              locating: locating,
+              label: locationText,
+            ),
           ),
           Positioned(
             left: 0,
@@ -221,30 +323,70 @@ class _MapButton extends StatelessWidget {
 }
 
 class _CurrentLocation extends StatelessWidget {
-  const _CurrentLocation();
+  const _CurrentLocation({
+    required this.locating,
+    required this.label,
+  });
+
+  final bool locating;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: const Color(0xFF2D8CFF).withOpacity(.13),
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Container(
-        width: 20,
-        height: 20,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2D8CFF),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 4),
-          boxShadow: const [
-            BoxShadow(color: Color(0x44000000), blurRadius: 8),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2D8CFF).withOpacity(.13),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: locating
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFF2D8CFF),
+                  ),
+                )
+              : Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2D8CFF),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x44000000), blurRadius: 8),
+                    ],
+                  ),
+                ),
         ),
-      ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFFBF5),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: const [
+              BoxShadow(color: Color(0x22000000), blurRadius: 8),
+            ],
+          ),
+          child: Text(
+            label,
+            textDirection: TextDirection.rtl,
+            style: const TextStyle(
+              color: Color(0xFF171817),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
