@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/session/rider_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -138,22 +140,29 @@ class _HomePageState extends State<HomePage> {
         child: SafeArea(
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
                 child: Row(
                   textDirection: TextDirection.rtl,
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 27,
                       backgroundColor: Color(0xFF171817),
                       child: Icon(Icons.person_rounded, color: Color(0xFFFFFBF5)),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('مستخدم Yalla Go', textDirection: TextDirection.rtl, style: TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w900)),
-                        Text('+20 10 0000 0000', style: TextStyle(color: Color(0xFF817A70), fontSize: 11)),
+                        Text(
+                          RiderSession.name ?? 'مستخدم Yalla Go',
+                          textDirection: TextDirection.rtl,
+                          style: const TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w900),
+                        ),
+                        Text(
+                          RiderSession.phone ?? '',
+                          style: const TextStyle(color: Color(0xFF817A70), fontSize: 11),
+                        ),
                       ],
                     ),
                   ],
@@ -292,8 +301,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 17),
-                  const Text(
-                    '👋 أهلاً بيك',
+                  Text(
+                    '👋 أهلاً بيك، ${RiderSession.name ?? 'صاحبنا'}',
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.right,
                     style: TextStyle(
