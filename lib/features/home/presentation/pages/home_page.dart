@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../location/presentation/pages/destination_page.dart';
 import '../../../history/presentation/pages/trip_history_page.dart';
@@ -15,6 +17,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final MapController mapController = MapController();
+  bool mapReady = false;
   bool locating = true;
   Position? currentPosition;
   String locationText = 'جاري تحديد موقعك...';
@@ -83,6 +87,7 @@ class _HomePageState extends State<HomePage> {
         locating = false;
         locationText = 'موقعك الحالي';
       });
+      _moveToCurrentLocation();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -91,6 +96,15 @@ class _HomePageState extends State<HomePage> {
       });
       _showMessage('تعذر تحديد موقعك حالياً. حاول مرة تانية.');
     }
+  }
+
+  void _moveToCurrentLocation() {
+    final position = currentPosition;
+    if (!mapReady || position == null) return;
+    mapController.move(
+      LatLng(position.latitude, position.longitude),
+      16.5,
+    );
   }
 
   void _showMessage(String message) {
@@ -154,7 +168,47 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFFF6F1E8),
       body: Stack(
         children: [
-          const Positioned.fill(child: _LightMap()),
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: const LatLng(26.5569, 31.6948),
+                initialZoom: 13.5,
+                minZoom: 4,
+                maxZoom: 19,
+                onMapReady: () {
+                  mapReady = true;
+                  _moveToCurrentLocation();
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.yalla_go',
+                  maxNativeZoom: 19,
+                ),
+                if (currentPosition != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          currentPosition!.latitude,
+                          currentPosition!.longitude,
+                        ),
+                        width: 54,
+                        height: 54,
+                        child: const _UserMapMarker(),
+                      ),
+                    ],
+                  ),
+                RichAttributionWidget(
+                  attributions: const [
+                    TextSourceAttribution('OpenStreetMap contributors'),
+                  ],
+                ),
+              ],
+            ),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -172,14 +226,24 @@ class _HomePageState extends State<HomePage> {
             bottom: 280,
             child: _MapButton(
               icon: Icons.near_me_rounded,
-              onTap: _detectLocation,
+              onTap: () async {
+                if (currentPosition == null) {
+                  await _detectLocation();
+                } else {
+                  _moveToCurrentLocation();
+                }
+              },
             ),
           ),
-          Align(
-            alignment: const Alignment(0, -.05),
-            child: _CurrentLocation(
-              locating: locating,
-              label: locationText,
+          Positioned(
+            top: 82,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: _LocationStatus(
+                locating: locating,
+                label: locationText,
+              ),
             ),
           ),
           Positioned(
@@ -322,8 +386,8 @@ class _MapButton extends StatelessWidget {
   }
 }
 
-class _CurrentLocation extends StatelessWidget {
-  const _CurrentLocation({
+class _LocationStatus extends StatelessWidget {
+  const _LocationStatus({
     required this.locating,
     required this.label,
   });
@@ -333,50 +397,33 @@ class _CurrentLocation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: const Color(0xFF2D8CFF).withOpacity(.13),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: locating
-              ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFF2D8CFF),
-                  ),
-                )
-              : Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2D8CFF),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x44000000), blurRadius: 8),
-                    ],
-                  ),
-                ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFBF5),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: const [
-              BoxShadow(color: Color(0x22000000), blurRadius: 8),
-            ],
-          ),
-          child: Text(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBF5),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(color: Color(0x22000000), blurRadius: 8),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.rtl,
+        children: [
+          if (locating)
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF2D8CFF),
+              ),
+            )
+          else
+            const Icon(Icons.my_location_rounded,
+                size: 15, color: Color(0xFF2D8CFF)),
+          const SizedBox(width: 6),
+          Text(
             label,
             textDirection: TextDirection.rtl,
             style: const TextStyle(
@@ -385,8 +432,35 @@ class _CurrentLocation extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserMapMarker extends StatelessWidget {
+  const _UserMapMarker();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D8CFF).withOpacity(.16),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D8CFF),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 4),
+          boxShadow: const [
+            BoxShadow(color: Color(0x44000000), blurRadius: 8),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -423,49 +497,6 @@ class _QuickPlace extends StatelessWidget {
       ),
     );
   }
-}
-
-class _LightMap extends StatelessWidget {
-  const _LightMap();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _MapPainter(),
-      child: Container(color: Colors.transparent),
-    );
-  }
-}
-
-class _MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final major = Paint()
-      ..color = const Color(0xFFFFFFFF)
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-    final minor = Paint()
-      ..color = const Color(0xFFD5D1C9)
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = -3; i < 10; i++) {
-      final y = i * 82.0;
-      canvas.drawLine(Offset(-40, y), Offset(size.width + 50, y + 190), major);
-      canvas.drawLine(
-        Offset(-20, y + 35),
-        Offset(size.width + 40, y + 225),
-        minor,
-      );
-    }
-    for (var i = -1; i < 8; i++) {
-      final x = i * 78.0;
-      canvas.drawLine(Offset(x, -30), Offset(x + 170, size.height), major);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class _DrawerItem extends StatelessWidget {
