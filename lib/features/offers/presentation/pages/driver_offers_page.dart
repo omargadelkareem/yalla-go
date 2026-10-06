@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../trip/presentation/pages/captain_arriving_page.dart';
 
 class DriverOffersPage extends StatelessWidget {
   const DriverOffersPage(
@@ -97,15 +98,16 @@ class DriverOffersPage extends StatelessWidget {
                                 itemCount: data.length,
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(height: 10),
-                                itemBuilder: (_, i) => _Card(data: data[i])))
+                                itemBuilder: (_, i) => _Card(data: data[i], destination: destination, vehicleType: vehicleType)))
                       ]))))
         ]));
   }
 }
 
 class _Card extends StatelessWidget {
-  const _Card({required this.data});
+  const _Card({required this.data, required this.destination, required this.vehicleType});
   final _Offer data;
+  final String destination, vehicleType;
   @override
   Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(14),
@@ -164,7 +166,22 @@ class _Card extends StatelessWidget {
             width: double.infinity,
             height: 44,
             child: FilledButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CaptainArrivingPage(
+                        captainName: data.name,
+                        vehicle: data.vehicle,
+                        eta: data.eta,
+                        price: data.price,
+                        rating: data.rating,
+                        destination: destination,
+                        vehicleType: vehicleType,
+                      ),
+                    ),
+                  );
+                },
                 style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF171817),
                     foregroundColor: const Color(0xFFFFFBF5),
