@@ -11,9 +11,10 @@ class CaptainArrivingPage extends StatelessWidget {
     required this.rating,
     required this.destination,
     required this.vehicleType,
+    this.plate = 'س و هـ 2451',
   });
 
-  final String captainName, vehicle, eta, price, destination, vehicleType;
+  final String captainName, vehicle, eta, price, destination, vehicleType, plate;
   final double rating;
 
   @override
@@ -172,6 +173,12 @@ class CaptainArrivingPage extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 3),
+                              Text(
+                                '${vehicle} • ${plate}',
+                                textDirection: TextDirection.rtl,
+                                style: const TextStyle(color: Color(0xFF817A70), fontSize: 10, fontWeight: FontWeight.w700),
+                              ),
+                              const SizedBox(height: 3),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -185,15 +192,7 @@ class CaptainArrivingPage extends StatelessWidget {
                                   ),
                                   const Icon(Icons.star_rounded,
                                       color: Color(0xFFB98B52), size: 15),
-                                  const SizedBox(width: 9),
-                                  Text(
-                                    vehicle,
-                                    textDirection: TextDirection.rtl,
-                                    style: const TextStyle(
-                                      color: Color(0xFF817A70),
-                                      fontSize: 11,
-                                    ),
-                                  ),
+
                                 ],
                               ),
                             ],
@@ -260,7 +259,7 @@ class CaptainArrivingPage extends StatelessWidget {
                           child: SizedBox(
                             height: 52,
                             child: OutlinedButton.icon(
-                              onPressed: () {},
+                              onPressed: () => _showMessageSheet(context),
                               icon: const Icon(Icons.chat_bubble_outline_rounded),
                               label: const Text('رسالة'),
                               style: OutlinedButton.styleFrom(
@@ -278,7 +277,7 @@ class CaptainArrivingPage extends StatelessWidget {
                           child: SizedBox(
                             height: 52,
                             child: FilledButton.icon(
-                              onPressed: () {},
+                              onPressed: () => _showCallDialog(context),
                               icon: const Icon(Icons.call_rounded),
                               label: const Text('اتصال'),
                               style: FilledButton.styleFrom(
@@ -327,7 +326,7 @@ class CaptainArrivingPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () => _showCancelSheet(context),
                       child: const Text(
                         'إلغاء الرحلة',
                         style: TextStyle(
@@ -345,6 +344,67 @@ class CaptainArrivingPage extends StatelessWidget {
       ),
     );
   }
+  void _showCallDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFBF5),
+        title: const Text('اتصال بالكابتن', textDirection: TextDirection.rtl, textAlign: TextAlign.right),
+        content: Text('سيتم الاتصال بـ $captainName عند ربط رقم الكابتن الحقيقي.', textDirection: TextDirection.rtl, textAlign: TextAlign.right),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('حسناً'))],
+      ),
+    );
+  }
+
+  void _showMessageSheet(BuildContext context) {
+    final controller = TextEditingController();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFFFBF5),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(sheetContext).viewInsets.bottom + 20),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('رسالة إلى $captainName', textDirection: TextDirection.rtl, style: const TextStyle(color: Color(0xFF171817), fontSize: 17, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 14),
+          TextField(controller: controller, textDirection: TextDirection.rtl, style: const TextStyle(color: Color(0xFF171817)), decoration: InputDecoration(hintText: 'اكتب رسالتك...', filled: true, fillColor: const Color(0xFFF1ECE4), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
+          const SizedBox(height: 12),
+          SizedBox(width: double.infinity, height: 50, child: FilledButton(onPressed: () => Navigator.pop(sheetContext), style: FilledButton.styleFrom(backgroundColor: const Color(0xFF171817)), child: const Text('إرسال'))),
+        ]),
+      ),
+    );
+  }
+
+  void _showCancelSheet(BuildContext context) {
+    const reasons = ['الكابتن بعيد', 'وقت الوصول طويل', 'غيّرت رأيي', 'طلبت الرحلة بالخطأ', 'سبب آخر'];
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFFFFFBF5),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
+            const Text('ليه عايز تلغي الرحلة؟', textDirection: TextDirection.rtl, style: TextStyle(color: Color(0xFF171817), fontSize: 19, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            const Text('اختيار السبب بيساعدنا نحسن التجربة.', textDirection: TextDirection.rtl, style: TextStyle(color: Color(0xFF817A70), fontSize: 11)),
+            const SizedBox(height: 12),
+            ...reasons.map((reason) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              trailing: const Icon(Icons.radio_button_unchecked_rounded, color: Color(0xFFB98B52)),
+              title: Text(reason, textDirection: TextDirection.rtl, textAlign: TextAlign.right, style: const TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w700)),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).popUntil((route) => route.settings.name == '/home' || route.isFirst);
+              },
+            )),
+          ]),
+        ),
+      ),
+    );
+  }
+
 }
 
 class _MapMarker extends StatelessWidget {
