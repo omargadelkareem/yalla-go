@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
@@ -28,6 +29,11 @@ class _SplashPageState extends State<SplashPage>
     );
 
     _controller.forward();
+
+    Future.delayed(const Duration(milliseconds: 1900), () {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+    });
   }
 
   @override
