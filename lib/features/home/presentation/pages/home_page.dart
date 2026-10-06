@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../location/presentation/pages/destination_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -95,7 +96,7 @@ class HomePage extends StatelessWidget {
                       color: const Color(0xFFF1ECE4),
                       borderRadius: BorderRadius.circular(16),
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DestinationPage())),
                         borderRadius: BorderRadius.circular(16),
                         child: const SizedBox(
                           height: 55,
