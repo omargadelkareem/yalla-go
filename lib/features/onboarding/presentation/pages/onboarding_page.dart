@@ -16,16 +16,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
   static const _pages = [
     (
       icon: Icons.route_rounded,
+      accentIcon: Icons.my_location_rounded,
       title: 'مشوارك.. بطريقتك',
       description: 'حدد وجهتك وشوف السعر الاسترشادي قبل ما تطلب رحلتك.',
     ),
     (
       icon: Icons.local_offer_rounded,
+      accentIcon: Icons.two_wheeler_rounded,
       title: 'اختار العرض المناسب',
       description: 'استقبل عروض الكباتن القريبين وقارن السعر ووقت الوصول براحتك.',
     ),
     (
       icon: Icons.verified_user_rounded,
+      accentIcon: Icons.shield_rounded,
       title: 'رحلة أوضح من البداية',
       description: 'بيانات الكابتن والرحلة قدامك، من أول الطلب لحد ما توصل.',
     ),
@@ -106,27 +109,54 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               ],
                             ),
                           ),
-                          child: Center(
-                            child: Container(
-                              width: 104,
-                              height: 104,
-                              decoration: BoxDecoration(
-                                color: AppColors.ivory,
-                                borderRadius: BorderRadius.circular(34),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x33000000),
-                                    blurRadius: 28,
-                                    offset: Offset(0, 16),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Positioned(
+                                top: 28,
+                                right: 22,
+                                child: Transform.rotate(
+                                  angle: -.16,
+                                  child: Icon(
+                                    page.accentIcon,
+                                    color: AppColors.bronze.withOpacity(.42),
+                                    size: 48,
                                   ),
-                                ],
+                                ),
                               ),
-                              child: Icon(
-                                page.icon,
-                                color: AppColors.charcoal,
-                                size: 48,
+                              Positioned(
+                                bottom: 25,
+                                left: 24,
+                                child: Container(
+                                  width: 48,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.bronze.withOpacity(.25),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
                               ),
-                            ),
+                              Container(
+                                width: 112,
+                                height: 112,
+                                decoration: BoxDecoration(
+                                  color: AppColors.ivory,
+                                  borderRadius: BorderRadius.circular(36),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x33000000),
+                                      blurRadius: 28,
+                                      offset: Offset(0, 16),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  page.icon,
+                                  color: AppColors.charcoal,
+                                  size: 50,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 44),
