@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../ride/presentation/pages/ride_options_page.dart';
 
 class DestinationPage extends StatefulWidget {
   const DestinationPage({super.key});
@@ -170,12 +171,14 @@ class _DestinationPageState extends State<DestinationPage> {
                                   return ListTile(
                                     contentPadding: EdgeInsets.zero,
                                     onTap: () {
-                                      controller.text = place;
-                                      controller.selection =
-                                          TextSelection.collapsed(
-                                        offset: controller.text.length,
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => RideOptionsPage(
+                                            destination: place,
+                                          ),
+                                        ),
                                       );
-                                      setState(() {});
                                     },
                                     leading: Container(
                                       width: 40,
