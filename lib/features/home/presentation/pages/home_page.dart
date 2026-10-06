@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../location/presentation/pages/destination_page.dart';
+import '../../../history/presentation/pages/trip_history_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../support/presentation/pages/support_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -8,6 +11,46 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        backgroundColor: const Color(0xFFFFFBF5),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    CircleAvatar(
+                      radius: 27,
+                      backgroundColor: Color(0xFF171817),
+                      child: Icon(Icons.person_rounded, color: Color(0xFFFFFBF5)),
+                    ),
+                    SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('مستخدم Yalla Go', textDirection: TextDirection.rtl, style: TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w900)),
+                        Text('+20 10 0000 0000', style: TextStyle(color: Color(0xFF817A70), fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: Color(0xFFE7E0D6)),
+              _DrawerItem(icon: Icons.history_rounded, label: 'رحلاتي', page: TripHistoryPage()),
+              _DrawerItem(icon: Icons.person_outline_rounded, label: 'حسابي', page: ProfilePage()),
+              _DrawerItem(icon: Icons.notifications_none_rounded, label: 'الإشعارات'),
+              _DrawerItem(icon: Icons.support_agent_rounded, label: 'المساعدة والدعم', page: SupportPage()),
+              const Spacer(),
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: Text('Yalla Go • Sohag', style: TextStyle(color: Color(0xFF817A70), fontSize: 11)),
+              ),
+            ],
+          ),
+        ),
+      ),
       backgroundColor: const Color(0xFFF6F1E8),
       body: Stack(
         children: [
@@ -17,7 +60,7 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Row(
                 children: [
-                  _MapButton(icon: Icons.menu_rounded, onTap: () {}),
+                  Builder(builder: (menuContext) => _MapButton(icon: Icons.menu_rounded, onTap: () => Scaffold.of(menuContext).openDrawer())),
                   const Spacer(),
                   _MapButton(icon: Icons.card_giftcard_rounded, onTap: () {}),
                 ],
@@ -126,13 +169,19 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const Text(
+                      'آخر الوجهات',
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(color: Color(0xFF171817), fontSize: 12, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      textDirection: TextDirection.rtl,
                       children: [
-                        _QuickPlace(icon: Icons.home_rounded, label: 'المنزل'),
-                        _QuickPlace(icon: Icons.work_rounded, label: 'العمل'),
-                        _QuickPlace(
-                            icon: Icons.history_rounded, label: 'مواقعي'),
+                        Expanded(child: _QuickPlace(icon: Icons.history_rounded, label: 'ميدان الثقافة')),
+                        SizedBox(width: 8),
+                        Expanded(child: _QuickPlace(icon: Icons.history_rounded, label: 'جامعة سوهاج')),
                       ],
                     ),
                   ],
@@ -273,5 +322,23 @@ class _MapPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class _DrawerItem extends StatelessWidget {
+  const _DrawerItem({required this.icon, required this.label, this.page});
+  final IconData icon;
+  final String label;
+  final Widget? page;
+  @override
+  Widget build(BuildContext context) => ListTile(
+    trailing: Icon(icon, color: const Color(0xFFB98B52)),
+    leading: const Icon(Icons.chevron_left_rounded, color: Color(0xFF817A70)),
+    title: Text(label, textDirection: TextDirection.rtl, textAlign: TextAlign.right,
+      style: const TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w700)),
+    onTap: () {
+      Navigator.pop(context);
+      if (page != null) Navigator.push(context, MaterialPageRoute(builder: (_) => page!));
+    },
+  );
 }
