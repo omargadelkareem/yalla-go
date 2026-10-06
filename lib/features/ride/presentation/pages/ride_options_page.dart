@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../../../offers/presentation/pages/driver_offers_page.dart';
-import '../../../offers/presentation/pages/no_drivers_page.dart';
+import '../../../../core/session/rider_session.dart';
 
 class RideOptionsPage extends StatefulWidget {
   const RideOptionsPage({
@@ -34,7 +35,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
   final MapController mapController = MapController();
 
   String selected = 'motorcycle';
-  bool simulateNoDrivers = false;
+  bool creatingRide = false;
   bool loadingRoute = true;
   String? routeError;
   double? distanceKm;
@@ -340,36 +341,14 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Row(
-                      textDirection: TextDirection.rtl,
-                      children: [
-                        Switch(
-                          value: simulateNoDrivers,
-                          activeColor: const Color(0xFFB98B52),
-                          onChanged: (value) =>
-                              setState(() => simulateNoDrivers = value),
-                        ),
-                        const SizedBox(width: 7),
-                        const Expanded(
-                          child: Text(
-                            'وضع تجربة: لا يوجد كباتن',
-                            textDirection: TextDirection.rtl,
-                            style: TextStyle(
-                              color: Color(0xFF817A70),
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: FilledButton(
-                        onPressed: loadingRoute || routeError != null
+                        onPressed: loadingRoute || routeError != null || creatingRide
                             ? null
-                            : () => _showSearching(context),
+                            : _createRideRequest,
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF171817),
                           foregroundColor: const Color(0xFFFFFBF5),
@@ -377,13 +356,22 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                             borderRadius: BorderRadius.circular(17),
                           ),
                         ),
-                        child: const Text(
-                          'اطلب الرحلة',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
+                        child: creatingRide
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Color(0xFFFFFBF5),
+                                ),
+                              )
+                            : const Text(
+                                'اطلب الرحلة',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -397,74 +385,71 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
     );
   }
 
-  void _showSearching(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(.32),
-      builder: (dialogContext) {
-        Future.delayed(const Duration(milliseconds: 1800), () {
-          if (!dialogContext.mounted) return;
-          Navigator.pop(dialogContext);
-          if (simulateNoDrivers) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => NoDriversPage(
-                  destination: widget.destination,
-                  vehicleType: selected,
-                ),
-              ),
-            ).then((retry) {
-              if (retry == true && context.mounted) {
-                setState(() => simulateNoDrivers = false);
-                _showSearching(context);
-              }
-            });
-            return;
-          }
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => DriverOffersPage(
-                destination: widget.destination,
-                vehicleType: selected,
-              ),
-            ),
-          );
-        });
-        return Dialog(
-          backgroundColor: const Color(0xFFFFFBF5),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 42),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-          child: const Padding(
-            padding: EdgeInsets.fromLTRB(24, 28, 24, 26),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              SizedBox(
-                  width: 42,
-                  height: 42,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 3, color: Color(0xFFB98B52))),
-              SizedBox(height: 20),
-              Text('بندور على كباتن قريبين منك...',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Color(0xFF171817),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800)),
-              SizedBox(height: 7),
-              Text('ثواني وهتظهرلك العروض المتاحة',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF817A70), fontSize: 12)),
-            ]),
+  Future<void> _createRideRequest() async {
+    final riderKey = RiderSession.phoneKey;
+    if (riderKey == null || distanceKm == null || durationMinutes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('سجل دخولك وحدد الرحلة مرة تانية.', textDirection: TextDirection.rtl)),
+      );
+      return;
+    }
+
+    setState(() => creatingRide = true);
+    try {
+      final requestRef = FirebaseDatabase.instance.ref('rideRequests').push();
+      final price = selected == 'motorcycle' ? motorcyclePrice.ceil() : carPrice.ceil();
+
+      await requestRef.set({
+        'rideId': requestRef.key,
+        'riderPhoneKey': riderKey,
+        'riderName': RiderSession.name ?? '',
+        'riderPhone': RiderSession.phone ?? '',
+        'pickup': {
+          'name': widget.pickup,
+          'lat': widget.pickupLatitude,
+          'lng': widget.pickupLongitude,
+        },
+        'destination': {
+          'name': widget.destination,
+          'lat': widget.destinationLatitude,
+          'lng': widget.destinationLongitude,
+        },
+        'distanceKm': double.parse(distanceKm!.toStringAsFixed(2)),
+        'durationMinutes': durationMinutes!.ceil(),
+        'vehicleType': selected,
+        'indicativePrice': price,
+        'status': 'searching',
+        'createdAt': ServerValue.timestamp,
+      });
+
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DriverOffersPage(
+            destination: widget.destination,
+            vehicleType: selected,
+            rideId: requestRef.key!,
           ),
-        );
-      },
-    );
+        ),
+      );
+    } on FirebaseException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.code == 'permission-denied'
+                ? 'صلاحيات قاعدة البيانات تمنع إنشاء الرحلة.'
+                : 'تعذر إنشاء الرحلة. حاول مرة تانية.',
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => creatingRide = false);
+    }
   }
+
 }
 
 class _RideCard extends StatelessWidget {
