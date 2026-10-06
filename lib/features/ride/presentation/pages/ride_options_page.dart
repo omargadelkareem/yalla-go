@@ -78,7 +78,10 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * .72,
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               decoration: const BoxDecoration(
                 color: Color(0xFFFFFBF5),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -92,9 +95,11 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
               ),
               child: SafeArea(
                 top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     Container(
                       width: 38,
                       height: 4,
@@ -217,6 +222,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       ),
                     ),
                   ],
+                ),
                 ),
               ),
             ),
