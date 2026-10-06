@@ -6,7 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
-import '../../../offers/presentation/pages/driver_offers_page.dart';
+import '../../../trip/presentation/pages/captain_arriving_page.dart';
 import '../../../../core/session/rider_session.dart';
 
 class RideOptionsPage extends StatefulWidget {
@@ -36,6 +36,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
 
   String selected = 'motorcycle';
   bool creatingRide = false;
+  String? activeRideId;
   bool loadingRoute = true;
   String? routeError;
   double? distanceKm;
@@ -340,9 +341,15 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    const SizedBox(height: 8),
-                    SizedBox(
+                    const SizedBox(height: 18),
+                    if (activeRideId != null)
+                      _LiveOffersSheet(
+                        rideId: activeRideId!,
+                        destination: widget.destination,
+                        vehicleType: selected,
+                      )
+                    else
+                      SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: FilledButton(
@@ -423,16 +430,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
       });
 
       if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => DriverOffersPage(
-            destination: widget.destination,
-            vehicleType: selected,
-            rideId: requestRef.key!,
-          ),
-        ),
-      );
+      setState(() => activeRideId = requestRef.key!);
     } on FirebaseException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -451,6 +449,249 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
   }
 
 }
+
+class _LiveOffersSheet extends StatelessWidget {
+  const _LiveOffersSheet({
+    required this.rideId,
+    required this.destination,
+    required this.vehicleType,
+  });
+
+  final String rideId;
+  final String destination;
+  final String vehicleType;
+
+  @override
+  Widget build(BuildContext context) {
+    final offersRef = FirebaseDatabase.instance.ref('rideOffers/$rideId');
+    return StreamBuilder<DatabaseEvent>(
+      stream: offersRef.onValue,
+      builder: (context, snapshot) {
+        final raw = snapshot.data?.snapshot.value;
+        final offers = <MapEntry<String, Map<String, dynamic>>>[];
+        if (raw is Map) {
+          raw.forEach((key, value) {
+            if (value is Map) {
+              offers.add(MapEntry(
+                key.toString(),
+                Map<String, dynamic>.from(value),
+              ));
+            }
+          });
+        }
+
+        if (offers.isEmpty) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1ECE4),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFFB98B52),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'بندور على كباتن قريبين منك...',
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      color: Color(0xFF171817),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'عروض الكباتن',
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Color(0xFF171817),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${offers.length} عرض',
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    color: Color(0xFF8C6535),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ...offers.map((entry) {
+              final data = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 9),
+                child: _LiveOfferCard(
+                  data: data,
+                  onAccept: () => _accept(
+                    context,
+                    entry.key,
+                    data,
+                  ),
+                ),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _accept(
+    BuildContext context,
+    String offerId,
+    Map<String, dynamic> data,
+  ) async {
+    await FirebaseDatabase.instance.ref('rideRequests/$rideId').update({
+      'status': 'accepted',
+      'acceptedOfferId': offerId,
+      'acceptedDriverId': data['driverId'],
+      'acceptedAt': ServerValue.timestamp,
+    });
+    await FirebaseDatabase.instance
+        .ref('rideOffers/$rideId/$offerId')
+        .update({'status': 'accepted'});
+
+    if (!context.mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CaptainArrivingPage(
+          captainName: (data['driverName'] ?? 'كابتن Yalla Go').toString(),
+          vehicle: (data['vehicle'] ?? 'مركبة').toString(),
+          eta: '${data['etaMinutes'] ?? '--'} د',
+          price: '${data['price'] ?? '--'} ج',
+          rating: (data['rating'] as num?)?.toDouble() ?? 5.0,
+          destination: destination,
+          vehicleType: vehicleType,
+        ),
+      ),
+    );
+  }
+}
+
+class _LiveOfferCard extends StatelessWidget {
+  const _LiveOfferCard({required this.data, required this.onAccept});
+
+  final Map<String, dynamic> data;
+  final VoidCallback onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (data['driverName'] ?? 'كابتن Yalla Go').toString();
+    final vehicle = (data['vehicle'] ?? 'مركبة').toString();
+    final eta = data['etaMinutes'] ?? '--';
+    final price = data['price'] ?? '--';
+    final rating = (data['rating'] as num?)?.toDouble() ?? 5.0;
+    final trips = (data['tripsCount'] as num?)?.toInt() ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4EFE7),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE6DED2)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              const CircleAvatar(
+                radius: 23,
+                backgroundColor: Color(0xFF171817),
+                child: Icon(Icons.person_rounded, color: Color(0xFFFFFBF5)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      name,
+                      textDirection: TextDirection.rtl,
+                      style: const TextStyle(
+                        color: Color(0xFF171817),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      '$vehicle • $eta د • ⭐ $rating • $trips رحلة',
+                      textDirection: TextDirection.rtl,
+                      style: const TextStyle(
+                        color: Color(0xFF817A70),
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$price ج',
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  color: Color(0xFF171817),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: FilledButton(
+              onPressed: onAccept,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF171817),
+                foregroundColor: const Color(0xFFFFFBF5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+              child: const Text(
+                'اختيار العرض',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class _RideCard extends StatelessWidget {
   const _RideCard({
