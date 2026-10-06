@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'otp_page.dart';
+import 'profile_setup_page.dart';
 
 class PhoneLoginPage extends StatefulWidget {
   const PhoneLoginPage({super.key});
@@ -19,10 +20,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   bool get valid =>
       RegExp(r'^01[0125][0-9]{8}$').hasMatch(controller.text.trim());
 
-  String get firebasePhone {
-    final phone = controller.text.trim();
-    return '+20${phone.substring(1)}';
-  }
+  String get normalizedPhone => '20${controller.text.trim().substring(1)}';
 
   @override
   void dispose() {
@@ -30,7 +28,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     super.dispose();
   }
 
-  Future<void> _sendCode() async {
+  Future<void> _continue() async {
     if (!valid || loading) return;
     FocusScope.of(context).unfocus();
     setState(() {
@@ -38,61 +36,43 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
       error = null;
     });
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: firebasePhone,
-      timeout: const Duration(seconds: 60),
-      verificationCompleted: (credential) async {
-        try {
-          await FirebaseAuth.instance.signInWithCredential(credential);
-          if (!mounted) return;
-          Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
-        } on FirebaseAuthException catch (e) {
-          if (!mounted) return;
-          setState(() {
-            loading = false;
-            error = _messageFor(e.code);
-          });
-        }
-      },
-      verificationFailed: (e) {
-        if (!mounted) return;
-        setState(() {
-          loading = false;
-          error = _messageFor(e.code);
-        });
-      },
-      codeSent: (verificationId, resendToken) {
-        if (!mounted) return;
-        setState(() => loading = false);
+    try {
+      final phone = controller.text.trim();
+      final snapshot = await FirebaseDatabase.instance
+          .ref('usersByPhone/$normalizedPhone')
+          .get();
+
+      if (!mounted) return;
+
+      if (snapshot.exists) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.home,
+          (_) => false,
+        );
+      } else {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => OtpPage(
-              phone: controller.text.trim(),
-              verificationId: verificationId,
-              resendToken: resendToken,
+            builder: (_) => ProfileSetupPage(
+              phone: phone,
+              phoneKey: normalizedPhone,
             ),
           ),
         );
-      },
-      codeAutoRetrievalTimeout: (_) {
-        if (mounted) setState(() => loading = false);
-      },
-    );
-  }
-
-  String _messageFor(String code) {
-    switch (code) {
-      case 'invalid-phone-number':
-        return 'رقم الموبايل غير صحيح.';
-      case 'too-many-requests':
-        return 'تم إرسال محاولات كثيرة. حاول مرة تانية بعد شوية.';
-      case 'network-request-failed':
-        return 'تأكد من اتصال الإنترنت وحاول مرة تانية.';
-      case 'operation-not-allowed':
-        return 'تسجيل الدخول بالموبايل غير مفعّل على Firebase.';
-      default:
-        return 'تعذر إرسال الكود حالياً. حاول مرة تانية.';
+      }
+    } on FirebaseException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        error = e.code == 'permission-denied'
+            ? 'قاعدة البيانات لا تسمح بتسجيل الحساب حالياً.'
+            : 'تعذر الاتصال بالسيرفر. حاول مرة تانية.';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => error = 'حصل خطأ غير متوقع. حاول مرة تانية.');
+    } finally {
+      if (mounted) setState(() => loading = false);
     }
   }
 
@@ -108,9 +88,13 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
             children: [
               Align(
                 alignment: Alignment.centerLeft,
-                child: _CircleButton(
-                  icon: Icons.arrow_back_rounded,
-                  onTap: () => Navigator.pop(context),
+                child: Material(
+                  color: AppColors.surface,
+                  shape: const CircleBorder(),
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_rounded, color: AppColors.ivory),
+                  ),
                 ),
               ),
               const Spacer(),
@@ -128,7 +112,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'هنبعتلك كود تأكيد علشان نأمّن حسابك ونبدأ مشوارك.',
+                'اكتب رقمك علشان ندخل على حسابك أو ننشئ لك حساب جديد.',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: TextStyle(
@@ -177,8 +161,10 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(19),
-                      borderSide:
-                          const BorderSide(color: AppColors.bronze, width: 1.4),
+                      borderSide: const BorderSide(
+                        color: AppColors.bronze,
+                        width: 1.4,
+                      ),
                     ),
                   ),
                 ),
@@ -189,17 +175,14 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   error!,
                   textDirection: TextDirection.rtl,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
-                    color: Color(0xFFE6A79D),
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Color(0xFFE6A79D), fontSize: 12),
                 ),
               ],
               const Spacer(flex: 2),
               SizedBox(
                 height: 58,
                 child: FilledButton(
-                  onPressed: valid && !loading ? _sendCode : null,
+                  onPressed: valid && !loading ? _continue : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.ivory,
                     foregroundColor: AppColors.charcoal,
@@ -218,11 +201,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                           ),
                         )
                       : const Text(
-                          'إرسال كود التأكيد',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          'متابعة',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                         ),
                 ),
               ),
@@ -232,22 +212,6 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
       ),
     );
   }
-}
-
-class _CircleButton extends StatelessWidget {
-  const _CircleButton({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-        color: AppColors.surface,
-        shape: const CircleBorder(),
-        child: IconButton(
-          onPressed: onTap,
-          icon: Icon(icon, color: AppColors.ivory),
-        ),
-      );
 }
 
 class _MiniBrand extends StatelessWidget {
