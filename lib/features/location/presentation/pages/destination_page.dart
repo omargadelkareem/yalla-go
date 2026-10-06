@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../ride/presentation/pages/ride_options_page.dart';
 
@@ -21,6 +25,9 @@ class _DestinationPageState extends State<DestinationPage> {
   bool editingPickup = false;
   bool locating = false;
   Position? currentPosition;
+  Timer? searchDebounce;
+  bool searchingPlaces = false;
+  List<_PlaceResult> liveResults = [];
 
   final List<String> places = const [
     'جامعة سوهاج الجديدة',
@@ -36,10 +43,72 @@ class _DestinationPageState extends State<DestinationPage> {
   TextEditingController get activeController =>
       editingPickup ? pickupController : destinationController;
 
-  List<String> get results {
+  List<_PlaceResult> get results {
     final query = activeController.text.trim();
-    if (query.isEmpty) return places.take(4).toList();
-    return places.where((place) => place.contains(query)).toList();
+    if (query.isEmpty) {
+      return places
+          .take(4)
+          .map((name) => _PlaceResult(name: name))
+          .toList();
+    }
+    return liveResults;
+  }
+
+  void onSearchChanged(String value) {
+    setState(() {});
+    searchDebounce?.cancel();
+    final query = value.trim();
+    if (query.length < 2) {
+      setState(() {
+        liveResults = [];
+        searchingPlaces = false;
+      });
+      return;
+    }
+    searchDebounce = Timer(const Duration(milliseconds: 750), () {
+      _searchPlaces(query);
+    });
+  }
+
+  Future<void> _searchPlaces(String query) async {
+    if (!mounted) return;
+    setState(() => searchingPlaces = true);
+    try {
+      final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
+        'q': '$query, Sohag, Egypt',
+        'format': 'jsonv2',
+        'addressdetails': '1',
+        'limit': '6',
+        'countrycodes': 'eg',
+        'accept-language': 'ar',
+      });
+      final response = await http.get(
+        uri,
+        headers: const {
+          'User-Agent': 'YallaGo/1.0 (Sohag ride app)',
+          'Accept-Language': 'ar',
+        },
+      );
+      if (response.statusCode != 200) {
+        throw Exception('place search failed');
+      }
+      final data = jsonDecode(response.body) as List<dynamic>;
+      final found = data.map((item) {
+        final map = item as Map<String, dynamic>;
+        return _PlaceResult(
+          name: (map['display_name'] as String?) ?? query,
+          latitude: double.tryParse((map['lat'] ?? '').toString()),
+          longitude: double.tryParse((map['lon'] ?? '').toString()),
+        );
+      }).where((item) => item.latitude != null && item.longitude != null).toList();
+      if (!mounted || activeController.text.trim() != query) return;
+      setState(() => liveResults = found);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => liveResults = []);
+    } finally {
+      if (mounted) setState(() => searchingPlaces = false);
+    }
   }
 
   @override
@@ -50,6 +119,7 @@ class _DestinationPageState extends State<DestinationPage> {
 
   @override
   void dispose() {
+    searchDebounce?.cancel();
     pickupController.dispose();
     destinationController.dispose();
     super.dispose();
@@ -123,9 +193,9 @@ class _DestinationPageState extends State<DestinationPage> {
       );
   }
 
-  void selectPlace(String place) {
+  void selectPlace(_PlaceResult place) {
     setState(() {
-      activeController.text = place;
+      activeController.text = place.name;
       activeController.selection =
           TextSelection.collapsed(offset: activeController.text.length);
     });
@@ -139,6 +209,10 @@ class _DestinationPageState extends State<DestinationPage> {
         builder: (_) => RideOptionsPage(
           pickup: pickupController.text.trim(),
           destination: destinationController.text.trim(),
+          pickupLatitude: currentPosition?.latitude,
+          pickupLongitude: currentPosition?.longitude,
+          destinationLatitude: place.latitude,
+          destinationLongitude: place.longitude,
         ),
       ),
     );
@@ -294,7 +368,7 @@ class _DestinationPageState extends State<DestinationPage> {
                       icon: Icons.my_location_rounded,
                       active: editingPickup,
                       onTap: () => setState(() => editingPickup = true),
-                      onChanged: (_) => setState(() {}),
+                      onChanged: onSearchChanged,
                     ),
                     const SizedBox(height: 9),
                     _LocationField(
@@ -304,7 +378,7 @@ class _DestinationPageState extends State<DestinationPage> {
                       active: !editingPickup,
                       autofocus: true,
                       onTap: () => setState(() => editingPickup = false),
-                      onChanged: (_) => setState(() {}),
+                      onChanged: onSearchChanged,
                     ),
                     const SizedBox(height: 12),
                     Align(
@@ -323,15 +397,22 @@ class _DestinationPageState extends State<DestinationPage> {
                     ),
                     const SizedBox(height: 5),
                     Flexible(
-                      child: results.isEmpty
+                      child: searchingPlaces
                           ? const Center(
-                              child: Text(
-                                'لا توجد نتائج مطابقة',
-                                textDirection: TextDirection.rtl,
-                                style: TextStyle(color: Color(0xFF817A70)),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                color: Color(0xFFB98B52),
                               ),
                             )
-                          : ListView.separated(
+                          : results.isEmpty
+                              ? const Center(
+                                  child: Text(
+                                    'لا توجد نتائج في سوهاج',
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(color: Color(0xFF817A70)),
+                                  ),
+                                )
+                              : ListView.separated(
                               padding: EdgeInsets.zero,
                               shrinkWrap: true,
                               itemCount: results.length,
@@ -359,7 +440,7 @@ class _DestinationPageState extends State<DestinationPage> {
                                     ),
                                   ),
                                   title: Text(
-                                    place,
+                                    place.name,
                                     textDirection: TextDirection.rtl,
                                     textAlign: TextAlign.right,
                                     style: const TextStyle(
@@ -488,4 +569,17 @@ class _PickupMarker extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _PlaceResult {
+  const _PlaceResult({
+    required this.name,
+    this.latitude,
+    this.longitude,
+  });
+
+  final String name;
+  final double? latitude;
+  final double? longitude;
 }
