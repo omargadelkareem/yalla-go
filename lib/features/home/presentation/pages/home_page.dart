@@ -175,7 +175,7 @@ class _CurrentLocation extends StatelessWidget {
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: const Color(0xFF2D8CFF).withValues(alpha: .13),
+        color: const Color(0xFF2D8CFF).withOpacity(.13),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
