@@ -75,12 +75,16 @@ class _DestinationPageState extends State<DestinationPage> {
     setState(() => searchingPlaces = true);
     try {
       final uri = Uri.https('nominatim.openstreetmap.org', '/search', {
-        'q': '$query, Sohag, Egypt',
+        'q': query,
         'format': 'jsonv2',
         'addressdetails': '1',
-        'limit': '6',
+        'namedetails': '1',
+        'limit': '10',
         'countrycodes': 'eg',
-        'accept-language': 'ar',
+        'accept-language': 'ar,en',
+        // Bias results to Sohag while still allowing nearby governorate results
+        // when OSM has incomplete local tagging.
+        'viewbox': '31.25,27.10,32.20,25.95',
       });
       final response = await http.get(
         uri,
@@ -95,8 +99,17 @@ class _DestinationPageState extends State<DestinationPage> {
       final data = jsonDecode(response.body) as List<dynamic>;
       final found = data.map((item) {
         final map = item as Map<String, dynamic>;
+        final names = map['namedetails'] as Map<String, dynamic>?;
+        final shortName = (names?['name:ar'] ??
+                names?['name'] ??
+                map['name'] ??
+                map['display_name'] ??
+                query)
+            .toString();
+        final displayName = (map['display_name'] ?? shortName).toString();
         return _PlaceResult(
-          name: (map['display_name'] as String?) ?? query,
+          name: shortName,
+          subtitle: displayName == shortName ? null : displayName,
           latitude: double.tryParse((map['lat'] ?? '').toString()),
           longitude: double.tryParse((map['lon'] ?? '').toString()),
         );
@@ -196,9 +209,15 @@ class _DestinationPageState extends State<DestinationPage> {
   void selectPlace(_PlaceResult place) {
     setState(() {
       activeController.text = place.name;
+      if (place.latitude != null && place.longitude != null) {
+        mapCenter = LatLng(place.latitude!, place.longitude!);
+      }
       activeController.selection =
           TextSelection.collapsed(offset: activeController.text.length);
     });
+    if (mapReady && place.latitude != null && place.longitude != null) {
+      mapController.move(mapCenter, 16.5);
+    }
     if (editingPickup) {
       setState(() => editingPickup = false);
       return;
@@ -443,12 +462,27 @@ class _DestinationPageState extends State<DestinationPage> {
                                     place.name,
                                     textDirection: TextDirection.rtl,
                                     textAlign: TextAlign.right,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       color: Color(0xFF171817),
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
+                                  subtitle: place.subtitle == null
+                                      ? null
+                                      : Text(
+                                          place.subtitle!,
+                                          textDirection: TextDirection.rtl,
+                                          textAlign: TextAlign.right,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Color(0xFF817A70),
+                                            fontSize: 10,
+                                          ),
+                                        ),
                                 );
                               },
                             ),
@@ -575,11 +609,13 @@ class _PickupMarker extends StatelessWidget {
 class _PlaceResult {
   const _PlaceResult({
     required this.name,
+    this.subtitle,
     this.latitude,
     this.longitude,
   });
 
   final String name;
+  final String? subtitle;
   final double? latitude;
   final double? longitude;
 }
