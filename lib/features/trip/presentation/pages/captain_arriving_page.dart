@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'active_trip_page.dart';
 
 class CaptainArrivingPage extends StatelessWidget {
   const CaptainArrivingPage({
@@ -295,6 +296,38 @@ class CaptainArrivingPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 11),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ActiveTripPage(
+                                captainName: captainName,
+                                vehicle: vehicle,
+                                price: price,
+                                destination: destination,
+                                vehicleType: vehicleType,
+                              ),
+                            ),
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFB98B52),
+                          foregroundColor: const Color(0xFF171817),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          'محاكاة وصول الكابتن وبدء الرحلة',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
                     TextButton(
                       onPressed: () {},
                       child: const Text(
