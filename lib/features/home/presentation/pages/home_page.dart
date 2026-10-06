@@ -168,8 +168,13 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFFF6F1E8),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: FlutterMap(
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 255,
+            child: ClipRect(
+              child: FlutterMap(
               mapController: mapController,
               options: MapOptions(
                 initialCenter: const LatLng(26.5569, 31.6948),
@@ -208,6 +213,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
+            ),
           ),
           SafeArea(
             child: Padding(
@@ -223,9 +229,9 @@ class _HomePageState extends State<HomePage> {
           ),
           Positioned(
             right: 16,
-            bottom: 280,
+            bottom: 268,
             child: _MapButton(
-              icon: Icons.near_me_rounded,
+              icon: locating ? Icons.hourglass_top_rounded : Icons.near_me_rounded,
               onTap: () async {
                 if (currentPosition == null) {
                   await _detectLocation();
@@ -233,17 +239,6 @@ class _HomePageState extends State<HomePage> {
                   _moveToCurrentLocation();
                 }
               },
-            ),
-          ),
-          Positioned(
-            top: 82,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: _LocationStatus(
-                locating: locating,
-                label: locationText,
-              ),
             ),
           ),
           Positioned(
