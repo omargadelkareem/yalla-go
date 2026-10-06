@@ -168,13 +168,8 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFFF6F1E8),
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 255,
-            child: ClipRect(
-              child: FlutterMap(
+          Positioned.fill(
+            child: FlutterMap(
               mapController: mapController,
               options: MapOptions(
                 initialCenter: const LatLng(26.5569, 31.6948),
@@ -212,7 +207,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ],
-            ),
             ),
           ),
           SafeArea(
