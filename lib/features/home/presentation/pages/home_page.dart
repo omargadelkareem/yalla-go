@@ -166,182 +166,215 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       backgroundColor: const Color(0xFFF6F1E8),
-      body: Stack(
+      body: Column(
         children: [
-          Positioned.fill(
-            child: FlutterMap(
-              mapController: mapController,
-              options: MapOptions(
-                initialCenter: const LatLng(26.5569, 31.6948),
-                initialZoom: 13.5,
-                minZoom: 4,
-                maxZoom: 19,
-                onMapReady: () {
-                  mapReady = true;
-                  _moveToCurrentLocation();
-                },
-              ),
+          Expanded(
+            child: Stack(
               children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.yalla_go',
-                  maxNativeZoom: 19,
-                ),
-                if (currentPosition != null)
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: LatLng(
-                          currentPosition!.latitude,
-                          currentPosition!.longitude,
+                Positioned.fill(
+                  child: FlutterMap(
+                    mapController: mapController,
+                    options: MapOptions(
+                      initialCenter: const LatLng(26.5569, 31.6948),
+                      initialZoom: 13.5,
+                      minZoom: 4,
+                      maxZoom: 19,
+                      onMapReady: () {
+                        mapReady = true;
+                        _moveToCurrentLocation();
+                      },
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.yalla_go',
+                        maxNativeZoom: 19,
+                      ),
+                      if (currentPosition != null)
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(
+                                currentPosition!.latitude,
+                                currentPosition!.longitude,
+                              ),
+                              width: 54,
+                              height: 54,
+                              child: const _UserMapMarker(),
+                            ),
+                          ],
                         ),
-                        width: 54,
-                        height: 54,
-                        child: const _UserMapMarker(),
+                      RichAttributionWidget(
+                        attributions: const [
+                          TextSourceAttribution('OpenStreetMap contributors'),
+                        ],
                       ),
                     ],
                   ),
-                RichAttributionWidget(
-                  attributions: const [
-                    TextSourceAttribution('OpenStreetMap contributors'),
-                  ],
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                    child: Row(
+                      children: [
+                        Builder(
+                          builder: (menuContext) => _MapButton(
+                            icon: Icons.menu_rounded,
+                            onTap: () =>
+                                Scaffold.of(menuContext).openDrawer(),
+                          ),
+                        ),
+                        const Spacer(),
+                        _MapButton(
+                          icon: Icons.card_giftcard_rounded,
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 16,
+                  bottom: 16,
+                  child: _MapButton(
+                    icon: locating
+                        ? Icons.hourglass_top_rounded
+                        : Icons.near_me_rounded,
+                    onTap: () async {
+                      if (currentPosition == null) {
+                        await _detectLocation();
+                      } else {
+                        _moveToCurrentLocation();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Row(
-                children: [
-                  Builder(builder: (menuContext) => _MapButton(icon: Icons.menu_rounded, onTap: () => Scaffold.of(menuContext).openDrawer())),
-                  const Spacer(),
-                  _MapButton(icon: Icons.card_giftcard_rounded, onTap: () {}),
+            top: false,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFFBF5),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x22000000),
+                    blurRadius: 28,
+                    offset: Offset(0, -8),
+                  ),
                 ],
               ),
-            ),
-          ),
-          Positioned(
-            right: 16,
-            bottom: 268,
-            child: _MapButton(
-              icon: locating ? Icons.hourglass_top_rounded : Icons.near_me_rounded,
-              onTap: () async {
-                if (currentPosition == null) {
-                  await _detectLocation();
-                } else {
-                  _moveToCurrentLocation();
-                }
-              },
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SafeArea(
-              top: false,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFFBF5),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x22000000),
-                      blurRadius: 28,
-                      offset: Offset(0, -8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD7D0C5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 38,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD7D0C5),
-                          borderRadius: BorderRadius.circular(20),
+                  ),
+                  const SizedBox(height: 17),
+                  const Text(
+                    '👋 أهلاً بيك',
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Color(0xFF171817),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'إلى أين تريد الذهاب؟',
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Color(0xFF4F4C47),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Material(
+                    color: const Color(0xFFF1ECE4),
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DestinationPage(),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 17),
-                    const Text(
-                      '👋 أهلاً بيك',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: Color(0xFF171817),
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'إلى أين تريد الذهاب؟',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: Color(0xFF4F4C47),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Material(
-                      color: const Color(0xFFF1ECE4),
                       borderRadius: BorderRadius.circular(16),
-                      child: InkWell(
-                        onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const DestinationPage())),
-                        borderRadius: BorderRadius.circular(16),
-                        child: const SizedBox(
-                          height: 55,
-                          child: Row(
-                            textDirection: TextDirection.rtl,
-                            children: [
-                              SizedBox(width: 16),
-                              Icon(Icons.search_rounded,
-                                  color: Color(0xFF171817), size: 22),
-                              SizedBox(width: 11),
-                              Expanded(
-                                child: Text(
-                                  'ابحث عن مكان أو اختر من الخريطة',
-                                  textDirection: TextDirection.rtl,
-                                  style: TextStyle(
-                                    color: Color(0xFF777168),
-                                    fontSize: 14,
-                                  ),
+                      child: const SizedBox(
+                        height: 55,
+                        child: Row(
+                          textDirection: TextDirection.rtl,
+                          children: [
+                            SizedBox(width: 16),
+                            Icon(
+                              Icons.search_rounded,
+                              color: Color(0xFF171817),
+                              size: 22,
+                            ),
+                            SizedBox(width: 11),
+                            Expanded(
+                              child: Text(
+                                'ابحث عن مكان أو اختر من الخريطة',
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(
+                                  color: Color(0xFF777168),
+                                  fontSize: 14,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    const Text(
-                      'آخر الوجهات',
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(color: Color(0xFF171817), fontSize: 12, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'آخر الوجهات',
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: Color(0xFF171817),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      textDirection: TextDirection.rtl,
-                      children: [
-                        Expanded(child: _QuickPlace(icon: Icons.history_rounded, label: 'ميدان الثقافة')),
-                        SizedBox(width: 8),
-                        Expanded(child: _QuickPlace(icon: Icons.history_rounded, label: 'جامعة سوهاج')),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Row(
+                    textDirection: TextDirection.rtl,
+                    children: [
+                      Expanded(
+                        child: _QuickPlace(
+                          icon: Icons.history_rounded,
+                          label: 'ميدان الثقافة',
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: _QuickPlace(
+                          icon: Icons.history_rounded,
+                          label: 'جامعة سوهاج',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
