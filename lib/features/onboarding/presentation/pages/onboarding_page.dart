@@ -101,8 +101,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
                               colors: [
-                                AppColors.bronze.withValues(alpha: .18),
-                                AppColors.bronze.withValues(alpha: .02),
+                                AppColors.bronze.withOpacity(.18),
+                                AppColors.bronze.withOpacity(.02),
                               ],
                             ),
                           ),
