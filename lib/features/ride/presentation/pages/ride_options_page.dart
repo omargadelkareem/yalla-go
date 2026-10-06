@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../offers/presentation/pages/driver_offers_page.dart';
 
 class RideOptionsPage extends StatefulWidget {
-  const RideOptionsPage({super.key, required this.destination});
+  const RideOptionsPage({super.key, required this.destination, this.pickup = 'موقعي الحالي - سوهاج'});
   final String destination;
+  final String pickup;
 
   @override
   State<RideOptionsPage> createState() => _RideOptionsPageState();
@@ -114,7 +115,9 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
+                    _TripSummary(pickup: widget.pickup, destination: widget.destination),
+                    const SizedBox(height: 12),
                     _RideCard(
                       selected: selected == 'motorcycle',
                       icon: Icons.two_wheeler_rounded,
@@ -398,4 +401,74 @@ class _RouteMapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+class _TripSummary extends StatelessWidget {
+  const _TripSummary({required this.pickup, required this.destination});
+  final String pickup;
+  final String destination;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1ECE4),
+        borderRadius: BorderRadius.circular(17),
+      ),
+      child: Column(
+        children: [
+          _SummaryLine(
+            icon: Icons.my_location_rounded,
+            text: pickup,
+            color: const Color(0xFF171817),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 7),
+            child: Divider(height: 1, color: Color(0xFFDCD5CA)),
+          ),
+          _SummaryLine(
+            icon: Icons.location_on_rounded,
+            text: destination,
+            color: const Color(0xFFB98B52),
+          ),
+          const SizedBox(height: 10),
+          const Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Icon(Icons.route_rounded, size: 15, color: Color(0xFF817A70)),
+              SizedBox(width: 5),
+              Text('المسافة والوقت تقديريان حالياً',
+                textDirection: TextDirection.rtl,
+                style: TextStyle(color: Color(0xFF817A70), fontSize: 10)),
+              Spacer(),
+              Text('5.8 كم • 12 د',
+                style: TextStyle(color: Color(0xFF171817), fontSize: 11, fontWeight: FontWeight.w800)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryLine extends StatelessWidget {
+  const _SummaryLine({required this.icon, required this.text, required this.color});
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    textDirection: TextDirection.rtl,
+    children: [
+      Icon(icon, size: 17, color: color),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(text, textDirection: TextDirection.rtl, textAlign: TextAlign.right,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Color(0xFF171817), fontSize: 11, fontWeight: FontWeight.w700)),
+      ),
+    ],
+  );
 }
