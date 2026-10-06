@@ -260,11 +260,13 @@ class CaptainArrivingPage extends StatelessWidget {
                             height: 52,
                             child: OutlinedButton.icon(
                               onPressed: () {},
-                              icon: const Icon(Icons.chat_bubble_outline_rounded),
+                              icon:
+                                  const Icon(Icons.chat_bubble_outline_rounded),
                               label: const Text('رسالة'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: const Color(0xFF171817),
-                                side: const BorderSide(color: Color(0xFFD8D0C5)),
+                                side:
+                                    const BorderSide(color: Color(0xFFD8D0C5)),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -351,8 +353,6 @@ class _ArrivalMap extends StatelessWidget {
 class _ArrivalMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawColor(const Color(0xFFEAE7E0));
-
     final road = Paint()
       ..color = Colors.white
       ..strokeWidth = 8
