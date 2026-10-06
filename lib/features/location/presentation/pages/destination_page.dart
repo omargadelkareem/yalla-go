@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../ride/presentation/pages/ride_options_page.dart';
 
@@ -11,6 +13,9 @@ class DestinationPage extends StatefulWidget {
 }
 
 class _DestinationPageState extends State<DestinationPage> {
+  final MapController mapController = MapController();
+  bool mapReady = false;
+  LatLng mapCenter = const LatLng(26.5569, 31.6948);
   final pickupController = TextEditingController(text: 'موقعي الحالي - سوهاج');
   final destinationController = TextEditingController();
   bool editingPickup = false;
@@ -35,6 +40,12 @@ class _DestinationPageState extends State<DestinationPage> {
     final query = activeController.text.trim();
     if (query.isEmpty) return places.take(4).toList();
     return places.where((place) => place.contains(query)).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => useCurrentLocation());
   }
 
   @override
@@ -85,8 +96,11 @@ class _DestinationPageState extends State<DestinationPage> {
         currentPosition = position;
         pickupController.text = 'موقعي الحالي';
         editingPickup = false;
+        mapCenter = LatLng(position.latitude, position.longitude);
       });
-      _showLocationMessage('تم تحديد موقعك الحالي بنجاح.');
+      if (mapReady) {
+        mapController.move(mapCenter, 16.5);
+      }
     } catch (_) {
       if (!mounted) return;
       _showLocationMessage('تعذر تحديد موقعك حالياً. حاول مرة تانية.');
@@ -136,7 +150,54 @@ class _DestinationPageState extends State<DestinationPage> {
       backgroundColor: const Color(0xFFF6F1E8),
       body: Stack(
         children: [
-          const Positioned.fill(child: _DestinationMap()),
+          Positioned.fill(
+            child: FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialCenter: mapCenter,
+                initialZoom: 13.5,
+                minZoom: 4,
+                maxZoom: 19,
+                onMapReady: () {
+                  mapReady = true;
+                  if (currentPosition != null) {
+                    mapController.move(mapCenter, 16.5);
+                  }
+                },
+                onPositionChanged: (camera, hasGesture) {
+                  if (hasGesture) {
+                    mapCenter = camera.center;
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.yalla_go',
+                  maxNativeZoom: 19,
+                ),
+                if (currentPosition != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: LatLng(
+                          currentPosition!.latitude,
+                          currentPosition!.longitude,
+                        ),
+                        width: 44,
+                        height: 44,
+                        child: const _PickupMarker(),
+                      ),
+                    ],
+                  ),
+                RichAttributionWidget(
+                  attributions: const [
+                    TextSourceAttribution('OpenStreetMap contributors'),
+                  ],
+                ),
+              ],
+            ),
+          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -405,42 +466,26 @@ class _CenterPin extends StatelessWidget {
   }
 }
 
-class _DestinationMap extends StatelessWidget {
-  const _DestinationMap();
+class _PickupMarker extends StatelessWidget {
+  const _PickupMarker();
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _MapPainter(),
-      child: const SizedBox.expand(),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D8CFF).withOpacity(.16),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: Container(
+        width: 18,
+        height: 18,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D8CFF),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 3),
+        ),
+      ),
     );
   }
-}
-
-class _MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final road = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-    final minor = Paint()
-      ..color = const Color(0xFFD3CFC7)
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
-
-    for (var i = -3; i < 10; i++) {
-      final y = i * 85.0;
-      canvas.drawLine(Offset(-40, y), Offset(size.width + 50, y + 190), road);
-      canvas.drawLine(
-          Offset(-20, y + 32), Offset(size.width + 40, y + 222), minor);
-    }
-    for (var i = -1; i < 8; i++) {
-      final x = i * 80.0;
-      canvas.drawLine(Offset(x, -30), Offset(x + 170, size.height), road);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
