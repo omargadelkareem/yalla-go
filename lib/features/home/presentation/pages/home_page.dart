@@ -37,6 +37,14 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
+      final cachedPosition = await Geolocator.getLastKnownPosition();
+      if (cachedPosition != null && mounted) {
+        setState(() {
+          currentPosition = cachedPosition;
+          locationText = 'موقعك الحالي';
+        });
+        _moveToCurrentLocation();
+      }
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (!mounted) return;
@@ -126,7 +134,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        backgroundColor: const Color(0xFFFFFBF5),
+        backgroundColor: const Color(0xFFFFFCF7),
         child: SafeArea(
           child: Column(
             children: [
@@ -259,7 +267,7 @@ class _HomePageState extends State<HomePage> {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 22),
               decoration: const BoxDecoration(
-                color: Color(0xFFFFFBF5),
+                color: Color(0xFFFFFCF7),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 boxShadow: [
                   BoxShadow(
@@ -278,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                       width: 38,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD7D0C5),
+                        color: const Color(0xFFB98B52),
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -290,24 +298,24 @@ class _HomePageState extends State<HomePage> {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       color: Color(0xFF171817),
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 5),
                   const Text(
-                    'إلى أين تريد الذهاب؟',
+                    'مشوارك يبدأ منين النهارده؟',
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF4F4C47),
+                      color: Color(0xFF6E675E),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 15),
                   Material(
-                    color: const Color(0xFFF1ECE4),
+                    color: const Color(0xFFF4EFE7),
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       onTap: () => Navigator.push(
@@ -392,7 +400,7 @@ class _MapButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFFFFBF5),
+      color: const Color(0xFFFFFCF7),
       shape: const CircleBorder(),
       elevation: 3,
       child: InkWell(
@@ -422,7 +430,7 @@ class _LocationStatus extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFBF5),
+        color: const Color(0xFFFFFCF7),
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(color: Color(0x22000000), blurRadius: 8),
@@ -497,7 +505,7 @@ class _QuickPlace extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1ECE4),
+        color: const Color(0xFFF4EFE7),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
