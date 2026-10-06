@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+
 import '../../../location/presentation/pages/destination_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -96,7 +96,10 @@ class HomePage extends StatelessWidget {
                       color: const Color(0xFFF1ECE4),
                       borderRadius: BorderRadius.circular(16),
                       child: InkWell(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DestinationPage())),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const DestinationPage())),
                         borderRadius: BorderRadius.circular(16),
                         child: const SizedBox(
                           height: 55,
@@ -128,7 +131,8 @@ class HomePage extends StatelessWidget {
                       children: [
                         _QuickPlace(icon: Icons.home_rounded, label: 'المنزل'),
                         _QuickPlace(icon: Icons.work_rounded, label: 'العمل'),
-                        _QuickPlace(icon: Icons.history_rounded, label: 'مواقعي'),
+                        _QuickPlace(
+                            icon: Icons.history_rounded, label: 'مواقعي'),
                       ],
                     ),
                   ],
@@ -244,7 +248,6 @@ class _LightMap extends StatelessWidget {
 class _MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawColor(const Color(0xFFEAE7E0));
     final major = Paint()
       ..color = const Color(0xFFFFFFFF)
       ..strokeWidth = 8

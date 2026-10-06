@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../offers/presentation/pages/driver_offers_page.dart';
 
 class RideOptionsPage extends StatefulWidget {
@@ -206,17 +207,29 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
         return Dialog(
           backgroundColor: const Color(0xFFFFFBF5),
           insetPadding: const EdgeInsets.symmetric(horizontal: 42),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
           child: const Padding(
             padding: EdgeInsets.fromLTRB(24, 28, 24, 26),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              SizedBox(width:42,height:42,child:CircularProgressIndicator(strokeWidth:3,color:Color(0xFFB98B52))),
-              SizedBox(height:20),
-              Text('بندور على كباتن قريبين منك...',textDirection:TextDirection.rtl,textAlign:TextAlign.center,
-                style:TextStyle(color:Color(0xFF171817),fontSize:17,fontWeight:FontWeight.w800)),
-              SizedBox(height:7),
-              Text('ثواني وهتظهرلك العروض المتاحة',textDirection:TextDirection.rtl,textAlign:TextAlign.center,
-                style:TextStyle(color:Color(0xFF817A70),fontSize:12)),
+              SizedBox(
+                  width: 42,
+                  height: 42,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 3, color: Color(0xFFB98B52))),
+              SizedBox(height: 20),
+              Text('بندور على كباتن قريبين منك...',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Color(0xFF171817),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800)),
+              SizedBox(height: 7),
+              Text('ثواني وهتظهرلك العروض المتاحة',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xFF817A70), fontSize: 12)),
             ]),
           ),
         );
@@ -257,9 +270,7 @@ class _RideCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected
-                  ? const Color(0xFFB98B52)
-                  : Colors.transparent,
+              color: selected ? const Color(0xFFB98B52) : Colors.transparent,
               width: 1.4,
             ),
           ),
@@ -328,10 +339,10 @@ class _MapPoint extends StatelessWidget {
     return Container(
       width: 42,
       height: 42,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFBF5),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFFBF5),
         shape: BoxShape.circle,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(color: Color(0x33000000), blurRadius: 10),
         ],
       ),
@@ -343,8 +354,6 @@ class _MapPoint extends StatelessWidget {
 class _RouteMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawColor(const Color(0xFFEAE7E0));
-
     final road = Paint()
       ..color = Colors.white
       ..strokeWidth = 8

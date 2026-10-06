@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../ride/presentation/pages/ride_options_page.dart';
 
 class DestinationPage extends StatefulWidget {
@@ -243,7 +244,6 @@ class _DestinationMap extends StatelessWidget {
 class _MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawColor(const Color(0xFFEAE7E0));
     final road = Paint()
       ..color = Colors.white
       ..strokeWidth = 8
