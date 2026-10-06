@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/routes/app_routes.dart';
+import '../../../../core/session/rider_session.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ProfileSetupPage extends StatefulWidget {
@@ -49,6 +50,12 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
         'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
       });
+
+      RiderSession.setUser(
+        key: widget.phoneKey,
+        phoneNumber: widget.phone,
+        riderName: nameController.text.trim(),
+      );
 
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
