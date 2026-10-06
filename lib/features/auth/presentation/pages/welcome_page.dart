@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -55,7 +56,7 @@ class WelcomePage extends StatelessWidget {
               SizedBox(
                 height: 58,
                 child: FilledButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.phoneLogin),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.ivory,
                     foregroundColor: AppColors.charcoal,
