@@ -4,9 +4,22 @@ import '../../../offers/presentation/pages/driver_offers_page.dart';
 import '../../../offers/presentation/pages/no_drivers_page.dart';
 
 class RideOptionsPage extends StatefulWidget {
-  const RideOptionsPage({super.key, required this.destination, this.pickup = 'موقعي الحالي - سوهاج'});
+  const RideOptionsPage({
+    super.key,
+    required this.destination,
+    this.pickup = 'موقعي الحالي - سوهاج',
+    this.pickupLatitude,
+    this.pickupLongitude,
+    this.destinationLatitude,
+    this.destinationLongitude,
+  });
+
   final String destination;
   final String pickup;
+  final double? pickupLatitude;
+  final double? pickupLongitude;
+  final double? destinationLatitude;
+  final double? destinationLongitude;
 
   @override
   State<RideOptionsPage> createState() => _RideOptionsPageState();
