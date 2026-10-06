@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../offers/presentation/pages/driver_offers_page.dart';
+import '../../../offers/presentation/pages/no_drivers_page.dart';
 
 class RideOptionsPage extends StatefulWidget {
   const RideOptionsPage({super.key, required this.destination, this.pickup = 'موقعي الحالي - سوهاج'});
@@ -13,6 +14,7 @@ class RideOptionsPage extends StatefulWidget {
 
 class _RideOptionsPageState extends State<RideOptionsPage> {
   String selected = 'motorcycle';
+  bool simulateNoDrivers = false;
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +158,30 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 10),
+                    Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        Switch(
+                          value: simulateNoDrivers,
+                          activeColor: const Color(0xFFB98B52),
+                          onChanged: (value) =>
+                              setState(() => simulateNoDrivers = value),
+                        ),
+                        const SizedBox(width: 7),
+                        const Expanded(
+                          child: Text(
+                            'وضع تجربة: لا يوجد كباتن',
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: Color(0xFF817A70),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -197,6 +222,23 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
         Future.delayed(const Duration(milliseconds: 1800), () {
           if (!dialogContext.mounted) return;
           Navigator.pop(dialogContext);
+          if (simulateNoDrivers) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => NoDriversPage(
+                  destination: widget.destination,
+                  vehicleType: selected,
+                ),
+              ),
+            ).then((retry) {
+              if (retry == true && context.mounted) {
+                setState(() => simulateNoDrivers = false);
+                _showSearching(context);
+              }
+            });
+            return;
+          }
           Navigator.push(
             context,
             MaterialPageRoute(
