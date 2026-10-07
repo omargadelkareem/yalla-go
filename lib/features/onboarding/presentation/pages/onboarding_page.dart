@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/yalla_go_logo.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -61,15 +62,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               padding: const EdgeInsets.fromLTRB(22, 14, 22, 0),
               child: Row(
                 children: [
-                  const Text(
-                    'YALLA GO',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.8,
-                      color: AppColors.ivory,
-                    ),
-                  ),
+                  const YallaGoLogo(size: 38),
                   const Spacer(),
                   TextButton(
                     onPressed: () => Navigator.pushReplacementNamed(
@@ -79,7 +72,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: const Text(
                       'تخطي',
                       textDirection: TextDirection.rtl,
-                      style: TextStyle(color: AppColors.textMuted),
+                      style: TextStyle(color: AppColors.textMutedDark),
                     ),
                   ),
                 ],
@@ -104,8 +97,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
                               colors: [
-                                AppColors.bronze.withOpacity(.18),
-                                AppColors.bronze.withOpacity(.02),
+                                AppColors.turquoise.withOpacity(.18),
+                                AppColors.turquoise.withOpacity(.02),
                               ],
                             ),
                           ),
@@ -119,7 +112,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   angle: -.16,
                                   child: Icon(
                                     page.accentIcon,
-                                    color: AppColors.bronze.withOpacity(.42),
+                                    color: AppColors.turquoise.withOpacity(.42),
                                     size: 48,
                                   ),
                                 ),
@@ -131,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   width: 48,
                                   height: 5,
                                   decoration: BoxDecoration(
-                                    color: AppColors.bronze.withOpacity(.25),
+                                    color: AppColors.turquoise.withOpacity(.25),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                 ),
@@ -140,7 +133,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 width: 112,
                                 height: 112,
                                 decoration: BoxDecoration(
-                                  color: AppColors.ivory,
+                                  color: AppColors.white,
                                   borderRadius: BorderRadius.circular(36),
                                   boxShadow: const [
                                     BoxShadow(
@@ -152,7 +145,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 ),
                                 child: Icon(
                                   page.icon,
-                                  color: AppColors.charcoal,
+                                  color: AppColors.navy,
                                   size: 50,
                                 ),
                               ),
@@ -165,7 +158,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           textAlign: TextAlign.center,
                           textDirection: TextDirection.rtl,
                           style: const TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AppColors.textDark,
                             fontSize: 29,
                             height: 1.25,
                             fontWeight: FontWeight.w800,
@@ -177,7 +170,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           textAlign: TextAlign.center,
                           textDirection: TextDirection.rtl,
                           style: const TextStyle(
-                            color: AppColors.textMuted,
+                            color: AppColors.textMutedDark,
                             fontSize: 16,
                             height: 1.7,
                           ),
@@ -203,8 +196,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           color: i == _index
-                              ? AppColors.bronze
-                              : AppColors.surface,
+                              ? AppColors.turquoise
+                              : AppColors.surfaceSoft,
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
@@ -217,8 +210,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: FilledButton(
                       onPressed: _next,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.ivory,
-                        foregroundColor: AppColors.charcoal,
+                        backgroundColor: AppColors.white,
+                        foregroundColor: AppColors.navy,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
