@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/yalla_go_logo.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -15,29 +16,14 @@ class WelcomePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    color: AppColors.ivory,
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: const Icon(
-                    Icons.near_me_rounded,
-                    color: AppColors.charcoal,
-                    size: 42,
-                  ),
-                ),
-              ),
+              const Align(alignment: Alignment.center, child: YallaGoLogo(size: 96)),
               const SizedBox(height: 30),
               const Text(
                 'أهلاً بيك في Yalla Go',
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.textDark,
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                 ),
@@ -48,7 +34,7 @@ class WelcomePage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedDark,
                   fontSize: 16,
                 ),
               ),
@@ -58,8 +44,8 @@ class WelcomePage extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () => Navigator.pushNamed(context, AppRoutes.phoneLogin),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.ivory,
-                    foregroundColor: AppColors.charcoal,
+                    backgroundColor: AppColors.turquoise,
+                    foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -77,7 +63,7 @@ class WelcomePage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedDark,
                   fontSize: 11,
                   height: 1.5,
                 ),
