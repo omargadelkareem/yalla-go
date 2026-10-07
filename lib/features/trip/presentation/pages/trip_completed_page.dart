@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class TripCompletedPage extends StatefulWidget {
   const TripCompletedPage({
@@ -31,7 +32,7 @@ class _TripCompletedPageState extends State<TripCompletedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F1E8),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(22),
@@ -70,7 +71,7 @@ class _TripCompletedPageState extends State<TripCompletedPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBF5),
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: const [
                     BoxShadow(color: Color(0x16000000), blurRadius: 18)
@@ -143,7 +144,7 @@ class _TripCompletedPageState extends State<TripCompletedPage> {
                       i < rating
                           ? Icons.star_rounded
                           : Icons.star_border_rounded,
-                      color: const Color(0xFFB98B52),
+                      color: AppColors.turquoise,
                       size: 34,
                     ),
                   ),
@@ -162,7 +163,7 @@ class _TripCompletedPageState extends State<TripCompletedPage> {
                   hintStyle:
                       const TextStyle(color: Color(0xFF817A70), fontSize: 12),
                   filled: true,
-                  fillColor: const Color(0xFFFFFBF5),
+                  fillColor: AppColors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(17),
                     borderSide: BorderSide.none,
@@ -176,8 +177,8 @@ class _TripCompletedPageState extends State<TripCompletedPage> {
                 child: FilledButton(
                   onPressed: finish,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF171817),
-                    foregroundColor: const Color(0xFFFFFBF5),
+                    backgroundColor: AppColors.navy,
+                    foregroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(17),
                     ),
