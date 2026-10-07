@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 import 'trip_completed_page.dart';
 
@@ -17,7 +18,7 @@ class ActiveTripPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F1E8),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           const Positioned.fill(child: _TripMap()),
@@ -30,7 +31,7 @@ class ActiveTripPage extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF171817),
+                    color: AppColors.navy,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: const [
                       BoxShadow(color: Color(0x33000000), blurRadius: 12)
@@ -61,7 +62,7 @@ class ActiveTripPage extends StatelessWidget {
                   icon: vehicleType == 'motorcycle'
                       ? Icons.two_wheeler_rounded
                       : Icons.directions_car_filled_rounded,
-                  color: const Color(0xFF171817),
+                  color: AppColors.navy,
                 ),
                 const _Marker(
                     icon: Icons.location_on_rounded, color: Color(0xFFB98B52)),
@@ -91,7 +92,7 @@ class ActiveTripPage extends StatelessWidget {
                         width: 38,
                         height: 4,
                         decoration: BoxDecoration(
-                            color: const Color(0xFFD7D0C5),
+                            color: Color(0xFFDCE7EC),
                             borderRadius: BorderRadius.circular(20))),
                     const SizedBox(height: 15),
                     Row(
@@ -119,7 +120,7 @@ class ActiveTripPage extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                              color: const Color(0xFFFFF1D8),
+                              color: Color(0xFFE8FAFB),
                               borderRadius: BorderRadius.circular(18)),
                           child: const Text('4.8 كم',
                               style: TextStyle(
@@ -133,7 +134,7 @@ class ActiveTripPage extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(13),
                       decoration: BoxDecoration(
-                          color: const Color(0xFFF4EFE7),
+                          color: AppColors.surfaceSoft,
                           borderRadius: BorderRadius.circular(16)),
                       child: Row(
                         textDirection: TextDirection.rtl,
@@ -206,8 +207,8 @@ class ActiveTripPage extends StatelessWidget {
                           );
                         },
                         style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF171817),
-                            foregroundColor: const Color(0xFFFFFBF5),
+                            backgroundColor: AppColors.navy,
+                            foregroundColor: AppColors.white,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16))),
                         child: const Text('محاكاة الوصول للوجهة',
@@ -259,7 +260,7 @@ class _TripPainter extends CustomPainter {
       canvas.drawLine(Offset(-40, y), Offset(size.width + 50, y + 190), road);
     }
     final route = Paint()
-      ..color = const Color(0xFFB98B52)
+      ..color = AppColors.turquoise
       ..strokeWidth = 5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
