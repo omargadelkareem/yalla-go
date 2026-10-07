@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -452,7 +453,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
 
 }
 
-class _LiveOffersSheet extends StatelessWidget {
+class _LiveOffersSheet extends StatefulWidget {
   const _LiveOffersSheet({
     required this.rideId,
     required this.destination,
@@ -464,13 +465,68 @@ class _LiveOffersSheet extends StatelessWidget {
   final String vehicleType;
 
   @override
+  State<_LiveOffersSheet> createState() => _LiveOffersSheetState();
+}
+
+class _LiveOffersSheetState extends State<_LiveOffersSheet> {
+  Timer? _timer;
+  int _secondsLeft = 60;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    _timer?.cancel();
+    setState(() => _secondsLeft = 60);
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_secondsLeft <= 1) {
+        timer.cancel();
+        setState(() => _secondsLeft = 0);
+      } else {
+        setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _retry() async {
+    await FirebaseDatabase.instance.ref('rideRequests/${widget.rideId}').update({
+      'status': 'searching',
+      'retryAt': ServerValue.timestamp,
+    });
+    if (mounted) _startCountdown();
+  }
+
+  Future<void> _cancel() async {
+    _timer?.cancel();
+    await FirebaseDatabase.instance.ref('rideRequests/${widget.rideId}').update({
+      'status': 'cancelled',
+      'cancelledAt': ServerValue.timestamp,
+    });
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final offersRef = FirebaseDatabase.instance.ref('rideOffers/$rideId');
+    final offersRef =
+        FirebaseDatabase.instance.ref('rideOffers/${widget.rideId}');
+
     return StreamBuilder<DatabaseEvent>(
       stream: offersRef.onValue,
       builder: (context, snapshot) {
         final raw = snapshot.data?.snapshot.value;
         final offers = <MapEntry<String, Map<String, dynamic>>>[];
+
         if (raw is Map) {
           raw.forEach((key, value) {
             if (value is Map) {
@@ -483,34 +539,124 @@ class _LiveOffersSheet extends StatelessWidget {
         }
 
         if (offers.isEmpty) {
+          if (_secondsLeft == 0) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSoft,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.local_taxi_outlined,
+                    color: AppColors.navy,
+                    size: 38,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'مفيش كباتن متاحين حالياً',
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'ممكن تعيد المحاولة أو تلغي الطلب.',
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(
+                      color: AppColors.textMutedDark,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _cancel,
+                          child: const Text('إلغاء الطلب'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: _retry,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.turquoise,
+                            foregroundColor: AppColors.white,
+                          ),
+                          child: const Text('إعادة المحاولة'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+
           return Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: AppColors.surfaceSoft,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               textDirection: TextDirection.rtl,
               children: [
                 SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFFB98B52),
+                  width: 54,
+                  height: 54,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        value: _secondsLeft / 60,
+                        strokeWidth: 4,
+                        backgroundColor: AppColors.white,
+                        color: AppColors.turquoise,
+                      ),
+                      Text(
+                        '$_secondsLeft',
+                        style: const TextStyle(
+                          color: AppColors.navy,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'بندور على كباتن قريبين منك...',
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(
-                      color: Color(0xFF171817),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
+                const SizedBox(width: 14),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'بندور على كباتن قريبين منك',
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          color: AppColors.textDark,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'هنستنى العروض لمدة دقيقة واحدة',
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(
+                          color: AppColors.textMutedDark,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -518,6 +664,7 @@ class _LiveOffersSheet extends StatelessWidget {
           );
         }
 
+        _timer?.cancel();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -530,7 +677,7 @@ class _LiveOffersSheet extends StatelessWidget {
                     textDirection: TextDirection.rtl,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF171817),
+                      color: AppColors.textDark,
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
                     ),
@@ -540,7 +687,7 @@ class _LiveOffersSheet extends StatelessWidget {
                   '${offers.length} عرض',
                   textDirection: TextDirection.rtl,
                   style: const TextStyle(
-                    color: Color(0xFF8C6535),
+                    color: AppColors.turquoiseDark,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
@@ -554,11 +701,7 @@ class _LiveOffersSheet extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 9),
                 child: _LiveOfferCard(
                   data: data,
-                  onAccept: () => _accept(
-                    context,
-                    entry.key,
-                    data,
-                  ),
+                  onAccept: () => _accept(context, entry.key, data),
                 ),
               );
             }),
@@ -573,14 +716,18 @@ class _LiveOffersSheet extends StatelessWidget {
     String offerId,
     Map<String, dynamic> data,
   ) async {
-    await FirebaseDatabase.instance.ref('rideRequests/$rideId').update({
+    _timer?.cancel();
+    await FirebaseDatabase.instance
+        .ref('rideRequests/${widget.rideId}')
+        .update({
       'status': 'accepted',
       'acceptedOfferId': offerId,
       'acceptedDriverId': data['driverId'],
       'acceptedAt': ServerValue.timestamp,
     });
+
     await FirebaseDatabase.instance
-        .ref('rideOffers/$rideId/$offerId')
+        .ref('rideOffers/${widget.rideId}/$offerId')
         .update({'status': 'accepted'});
 
     if (!context.mounted) return;
@@ -593,8 +740,8 @@ class _LiveOffersSheet extends StatelessWidget {
           eta: '${data['etaMinutes'] ?? '--'} د',
           price: '${data['price'] ?? '--'} ج',
           rating: (data['rating'] as num?)?.toDouble() ?? 5.0,
-          destination: destination,
-          vehicleType: vehicleType,
+          destination: widget.destination,
+          vehicleType: widget.vehicleType,
         ),
       ),
     );
@@ -792,9 +939,24 @@ class _VehicleArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _VehiclePainter(type == 'car'),
-      child: const SizedBox.expand(),
+    final imageUrl = type == 'car'
+        ? 'https://img.icons8.com/3d-fluency/188/car.png'
+        : 'https://img.icons8.com/3d-fluency/188/motorcycle.png';
+
+    return Padding(
+      padding: const EdgeInsets.all(3),
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+        errorBuilder: (_, __, ___) => Icon(
+          type == 'car'
+              ? Icons.directions_car_filled_rounded
+              : Icons.two_wheeler_rounded,
+          color: AppColors.navy,
+          size: 34,
+        ),
+      ),
     );
   }
 }
