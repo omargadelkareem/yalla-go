@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/session/rider_session.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/yalla_go_logo.dart';
 import 'profile_setup_page.dart';
 
 class PhoneLoginPage extends StatefulWidget {
@@ -86,7 +87,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.charcoal,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(22, 12, 22, 26),
@@ -96,7 +97,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
-                  color: AppColors.surface,
+                  color: AppColors.white,
                   shape: const CircleBorder(),
                   child: IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -105,14 +106,14 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                 ),
               ),
               const Spacer(),
-              const _MiniBrand(),
+              const YallaGoLogo(size: 72),
               const SizedBox(height: 34),
               const Text(
                 'رقم موبايلك',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.textDark,
                   fontSize: 31,
                   fontWeight: FontWeight.w900,
                 ),
@@ -123,7 +124,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedDark,
                   fontSize: 14,
                   height: 1.7,
                 ),
@@ -138,7 +139,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   maxLength: 11,
                   onChanged: (_) => setState(() => error = null),
                   style: const TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textDark,
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
                     letterSpacing: .5,
@@ -148,7 +149,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     hintText: '01XXXXXXXXX',
                     hintStyle: const TextStyle(color: Color(0xFF77776F)),
                     filled: true,
-                    fillColor: AppColors.surface,
+                    fillColor: AppColors.white,
                     prefixIcon: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       child: Center(
@@ -156,7 +157,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                         child: Text(
                           '+20',
                           style: TextStyle(
-                            color: AppColors.bronzeLight,
+                            color: AppColors.turquoiseDark,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
@@ -169,7 +170,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(19),
                       borderSide: const BorderSide(
-                        color: AppColors.bronze,
+                        color: AppColors.turquoise,
                         width: 1.4,
                       ),
                     ),
@@ -192,8 +193,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   onPressed: valid && !loading ? _continue : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.ivory,
-                    foregroundColor: AppColors.charcoal,
-                    disabledBackgroundColor: AppColors.surface,
+                    foregroundColor: AppColors.background,
+                    disabledBackgroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -204,7 +205,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                           height: 23,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: AppColors.charcoal,
+                            color: AppColors.background,
                           ),
                         )
                       : const Text(
@@ -240,7 +241,7 @@ class _MiniBrand extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.near_me_rounded,
-                color: AppColors.charcoal,
+                color: AppColors.background,
                 size: 22,
               ),
             ),
