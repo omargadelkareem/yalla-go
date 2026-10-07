@@ -194,8 +194,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   onPressed: valid && !loading ? _continue : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.ivory,
-                    foregroundColor: AppColors.background,
-                    disabledBackgroundColor: AppColors.white,
+                    foregroundColor: AppColors.textDark,
+                    disabledBackgroundColor: AppColors.surfaceSoft,
+                    disabledForegroundColor: AppColors.textMutedDark,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -206,7 +207,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                           height: 23,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: AppColors.background,
+                            color: AppColors.textDark,
                           ),
                         )
                       : const Text(
