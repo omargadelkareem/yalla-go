@@ -4,39 +4,39 @@ import 'app_colors.dart';
 
 abstract final class AppTheme {
   static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.bronze,
-      brightness: Brightness.dark,
-      surface: AppColors.charcoal,
-    );
-
+    final textTheme = GoogleFonts.cairoTextTheme();
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: scheme.copyWith(
-        primary: AppColors.bronze,
-        secondary: AppColors.bronzeLight,
-        surface: AppColors.charcoal,
-      ),
-      scaffoldBackgroundColor: AppColors.charcoal,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.background,
       fontFamily: GoogleFonts.cairo().fontFamily,
-      splashFactory: InkSparkle.splashFactory,
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.w800,
-          letterSpacing: -1.5,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.turquoise,
+        secondary: AppColors.navy,
+        surface: AppColors.white,
+        onPrimary: AppColors.white,
+        onSecondary: AppColors.white,
+        onSurface: AppColors.textDark,
+      ),
+      textTheme: textTheme.copyWith(
+        headlineLarge: textTheme.headlineLarge?.copyWith(color: AppColors.textDark,fontWeight: FontWeight.w900),
+        titleLarge: textTheme.titleLarge?.copyWith(color: AppColors.textDark,fontWeight: FontWeight.w800),
+        bodyLarge: textTheme.bodyLarge?.copyWith(color: AppColors.textDark),
+        bodyMedium: textTheme.bodyMedium?.copyWith(color: AppColors.textMutedDark),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.turquoise,
+          foregroundColor: AppColors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        headlineLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.w800,
-        ),
-        titleLarge: TextStyle(
-          color: AppColors.textPrimary,
-          fontWeight: FontWeight.w700,
-        ),
-        bodyLarge: TextStyle(color: AppColors.textPrimary),
-        bodyMedium: TextStyle(color: AppColors.textMuted),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16),borderSide: const BorderSide(color: Color(0xFFE2EAF0))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),borderSide: const BorderSide(color: Color(0xFFE2EAF0))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16),borderSide: const BorderSide(color: AppColors.turquoise,width: 1.5)),
       ),
     );
   }
