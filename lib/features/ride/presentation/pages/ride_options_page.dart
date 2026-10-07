@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../trip/presentation/pages/captain_arriving_page.dart';
 import '../../../../core/session/rider_session.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class RideOptionsPage extends StatefulWidget {
   const RideOptionsPage({
@@ -139,7 +140,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F1E8),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           Positioned.fill(
@@ -166,7 +167,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                       Polyline(
                         points: routePoints,
                         strokeWidth: 5,
-                        color: const Color(0xFFB98B52),
+                        color: AppColors.turquoise,
                       ),
                     ],
                   ),
@@ -216,7 +217,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Material(
-                  color: const Color(0xFFFFFBF5),
+                  color: AppColors.white,
                   shape: const CircleBorder(),
                   elevation: 3,
                   child: IconButton(
@@ -357,8 +358,8 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                             ? null
                             : _createRideRequest,
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF171817),
-                          foregroundColor: const Color(0xFFFFFBF5),
+                          backgroundColor: AppColors.navy,
+                          foregroundColor: AppColors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(17),
                           ),
@@ -485,7 +486,7 @@ class _LiveOffersSheet extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1ECE4),
+              color: AppColors.surfaceSoft,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Row(
@@ -617,9 +618,9 @@ class _LiveOfferCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4EFE7),
+        color: AppColors.surfaceSoft,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE6DED2)),
+        border: Border.all(color: Color(0xFFE2EAF0)),
       ),
       child: Column(
         children: [
@@ -674,8 +675,8 @@ class _LiveOfferCard extends StatelessWidget {
             child: FilledButton(
               onPressed: onAccept,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF171817),
-                foregroundColor: const Color(0xFFFFFBF5),
+                backgroundColor: AppColors.navy,
+                foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                 ),
@@ -696,7 +697,7 @@ class _LiveOfferCard extends StatelessWidget {
 class _RideCard extends StatelessWidget {
   const _RideCard({
     required this.selected,
-    required this.icon,
+    required this.vehicleType,
     required this.title,
     required this.subtitle,
     required this.eta,
@@ -705,7 +706,7 @@ class _RideCard extends StatelessWidget {
   });
 
   final bool selected;
-  final IconData icon;
+  final String vehicleType;
   final String title;
   final String subtitle;
   final String eta;
@@ -715,7 +716,7 @@ class _RideCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? const Color(0xFFFFF7E9) : const Color(0xFFF1ECE4),
+      color: selected ? Color(0xFFE8FAFB) : AppColors.surfaceSoft,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -725,7 +726,7 @@ class _RideCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? const Color(0xFFB98B52) : Colors.transparent,
+              color: selected ? AppColors.turquoise : Colors.transparent,
               width: 1.4,
             ),
           ),
@@ -736,10 +737,10 @@ class _RideCard extends StatelessWidget {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBF5),
+                  color: AppColors.white,
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(icon, color: const Color(0xFF171817), size: 27),
+                child: _VehicleArtwork(type: vehicleType),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -782,6 +783,69 @@ class _RideCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _VehicleArtwork extends StatelessWidget {
+  const _VehicleArtwork({required this.type});
+  final String type;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _VehiclePainter(type == 'car'),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+class _VehiclePainter extends CustomPainter {
+  const _VehiclePainter(this.isCar);
+  final bool isCar;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final navy = Paint()..color = AppColors.navy;
+    final teal = Paint()..color = AppColors.turquoise;
+    final glass = Paint()..color = const Color(0xFFDCECF1);
+    final tire = Paint()..color = const Color(0xFF172A38);
+    if (isCar) {
+      final body = RRect.fromRectAndRadius(
+        Rect.fromLTWH(size.width*.08,size.height*.42,size.width*.84,size.height*.34),
+        Radius.circular(size.height*.12),
+      );
+      canvas.drawRRect(body, Paint()..color=AppColors.white);
+      canvas.drawRRect(body, Paint()..style=PaintingStyle.stroke..strokeWidth=2..color=AppColors.navy);
+      final roof=Path()
+        ..moveTo(size.width*.28,size.height*.43)
+        ..lineTo(size.width*.40,size.height*.24)
+        ..lineTo(size.width*.68,size.height*.24)
+        ..lineTo(size.width*.82,size.height*.43)
+        ..close();
+      canvas.drawPath(roof, glass);
+      canvas.drawLine(Offset(size.width*.53,size.height*.25),Offset(size.width*.53,size.height*.43),navy..strokeWidth=1.5);
+      canvas.drawRect(Rect.fromLTWH(size.width*.10,size.height*.58,size.width*.08,size.height*.05),teal);
+      canvas.drawCircle(Offset(size.width*.28,size.height*.76),size.height*.10,tire);
+      canvas.drawCircle(Offset(size.width*.74,size.height*.76),size.height*.10,tire);
+      canvas.drawCircle(Offset(size.width*.28,size.height*.76),size.height*.045,Paint()..color=Colors.white);
+      canvas.drawCircle(Offset(size.width*.74,size.height*.76),size.height*.045,Paint()..color=Colors.white);
+    } else {
+      canvas.drawCircle(Offset(size.width*.26,size.height*.72),size.height*.15,tire);
+      canvas.drawCircle(Offset(size.width*.76,size.height*.72),size.height*.15,tire);
+      canvas.drawCircle(Offset(size.width*.26,size.height*.72),size.height*.10,Paint()..color=Colors.white);
+      canvas.drawCircle(Offset(size.width*.76,size.height*.72),size.height*.10,Paint()..color=Colors.white);
+      final frame=Paint()..color=AppColors.turquoise..strokeWidth=4..strokeCap=StrokeCap.round;
+      canvas.drawLine(Offset(size.width*.28,size.height*.68),Offset(size.width*.48,size.height*.48),frame);
+      canvas.drawLine(Offset(size.width*.48,size.height*.48),Offset(size.width*.62,size.height*.70),frame);
+      canvas.drawLine(Offset(size.width*.28,size.height*.68),Offset(size.width*.62,size.height*.70),frame);
+      canvas.drawLine(Offset(size.width*.62,size.height*.70),Offset(size.width*.73,size.height*.40),navy..strokeWidth=4);
+      canvas.drawLine(Offset(size.width*.69,size.height*.40),Offset(size.width*.84,size.height*.38),navy);
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(size.width*.39,size.height*.39,size.width*.25,size.height*.12),const Radius.circular(8)),navy);
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(size.width*.35,size.height*.31,size.width*.22,size.height*.08),const Radius.circular(8)),teal);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class _MapPoint extends StatelessWidget {
@@ -830,7 +894,7 @@ class _TripSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1ECE4),
+        color: AppColors.surfaceSoft,
         borderRadius: BorderRadius.circular(17),
       ),
       child: Column(
@@ -838,7 +902,7 @@ class _TripSummary extends StatelessWidget {
           _SummaryLine(
             icon: Icons.my_location_rounded,
             text: pickup,
-            color: const Color(0xFF171817),
+            color: AppColors.navy,
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 7),
@@ -847,7 +911,7 @@ class _TripSummary extends StatelessWidget {
           _SummaryLine(
             icon: Icons.location_on_rounded,
             text: destination,
-            color: const Color(0xFFB98B52),
+            color: AppColors.turquoise,
           ),
           const SizedBox(height: 10),
           if (loading)
