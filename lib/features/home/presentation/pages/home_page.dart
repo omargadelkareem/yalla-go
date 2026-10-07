@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/session/rider_session.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/yalla_go_logo.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -136,7 +138,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        backgroundColor: const Color(0xFFFFFCF7),
+        backgroundColor: AppColors.white,
         child: SafeArea(
           child: Column(
             children: [
@@ -182,7 +184,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFF6F1E8),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           Expanded(
@@ -243,8 +245,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const Spacer(),
+                        const YallaGoLogo(size: 42, showName: false),
+                        const Spacer(),
                         _MapButton(
-                          icon: Icons.card_giftcard_rounded,
+                          icon: Icons.notifications_none_rounded,
                           onTap: () {},
                         ),
                       ],
@@ -295,7 +299,7 @@ class _HomePageState extends State<HomePage> {
                       width: 38,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFB98B52),
+                        color: AppColors.turquoise,
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -324,7 +328,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 15),
                   Material(
-                    color: const Color(0xFFF4EFE7),
+                    color: AppColors.surfaceSoft,
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       onTap: () => Navigator.push(
@@ -409,7 +413,7 @@ class _MapButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFFFFCF7),
+      color: AppColors.white,
       shape: const CircleBorder(),
       elevation: 3,
       child: InkWell(
@@ -418,7 +422,7 @@ class _MapButton extends StatelessWidget {
         child: SizedBox(
           width: 46,
           height: 46,
-          child: Icon(icon, color: const Color(0xFF171817), size: 22),
+          child: Icon(icon, color: AppColors.navy, size: 22),
         ),
       ),
     );
@@ -439,7 +443,7 @@ class _LocationStatus extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFCF7),
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(color: Color(0x22000000), blurRadius: 8),
@@ -484,7 +488,7 @@ class _UserMapMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2D8CFF).withOpacity(.16),
+        color: AppColors.turquoise.withOpacity(.16),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
@@ -492,7 +496,7 @@ class _UserMapMarker extends StatelessWidget {
         width: 22,
         height: 22,
         decoration: BoxDecoration(
-          color: const Color(0xFF2D8CFF),
+          color: AppColors.turquoise,
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 4),
           boxShadow: const [
@@ -514,14 +518,14 @@ class _QuickPlace extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4EFE7),
+        color: AppColors.surfaceSoft,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         textDirection: TextDirection.rtl,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF171817)),
+          Icon(icon, size: 16, color: AppColors.navy),
           const SizedBox(width: 6),
           Text(
             label,
@@ -545,7 +549,7 @@ class _DrawerItem extends StatelessWidget {
   final Widget? page;
   @override
   Widget build(BuildContext context) => ListTile(
-    trailing: Icon(icon, color: const Color(0xFFB98B52)),
+    trailing: Icon(icon, color: AppColors.turquoise),
     leading: const Icon(Icons.chevron_left_rounded, color: Color(0xFF817A70)),
     title: Text(label, textDirection: TextDirection.rtl, textAlign: TextAlign.right,
       style: const TextStyle(color: Color(0xFF171817), fontWeight: FontWeight.w700)),
