@@ -302,7 +302,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                     const SizedBox(height: 12),
                     _RideCard(
                       selected: selected == 'motorcycle',
-                      icon: Icons.two_wheeler_rounded,
+                      vehicleType: 'motorcycle',
                       title: 'موتوسيكل',
                       subtitle: 'الأسرع والأوفر',
                       eta: durationMinutes == null
@@ -314,7 +314,7 @@ class _RideOptionsPageState extends State<RideOptionsPage> {
                     const SizedBox(height: 10),
                     _RideCard(
                       selected: selected == 'car',
-                      icon: Icons.directions_car_filled_rounded,
+                      vehicleType: 'car',
                       title: 'عربية',
                       subtitle: 'راحة أكتر في مشوارك',
                       eta: durationMinutes == null
@@ -716,7 +716,7 @@ class _RideCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? Color(0xFFE8FAFB) : AppColors.surfaceSoft,
+      color: selected ? const Color(0xFFE8FAFB) : AppColors.surfaceSoft,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
