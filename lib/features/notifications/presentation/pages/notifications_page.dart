@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -34,9 +35,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F1E8),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF6F1E8),
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
         title: const Text(
@@ -67,12 +68,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
           return Container(
             padding: const EdgeInsets.all(15),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFBF5),
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: unread
-                    ? const Color(0xFFB98B52)
-                    : const Color(0xFFE7E0D6),
+                    ? AppColors.turquoise
+                    : Color(0xFFE2EAF0),
               ),
             ),
             child: Row(
@@ -83,10 +84,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1ECE4),
+                    color: AppColors.surfaceSoft,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(item.icon, color: const Color(0xFFB98B52)),
+                  child: Icon(item.icon, color: AppColors.turquoise),
                 ),
                 const SizedBox(width: 11),
                 Expanded(
