@@ -81,7 +81,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.charcoal,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(22, 12, 22, 26),
@@ -91,7 +91,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
-                  color: AppColors.surface,
+                  color: AppColors.white,
                   shape: const CircleBorder(),
                   child: IconButton(
                     onPressed: loading ? null : () => Navigator.pop(context),
@@ -111,7 +111,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   ),
                   child: const Icon(
                     Icons.person_rounded,
-                    color: AppColors.charcoal,
+                    color: AppColors.background,
                     size: 34,
                   ),
                 ),
@@ -122,7 +122,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.textDark,
                   fontSize: 31,
                   fontWeight: FontWeight.w900,
                 ),
@@ -133,7 +133,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: const TextStyle(
-                  color: AppColors.textMuted,
+                  color: AppColors.textMutedDark,
                   fontSize: 14,
                   height: 1.7,
                 ),
@@ -148,7 +148,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   onChanged: (_) => setState(() => error = null),
                   onSubmitted: (_) => _createAccount(),
                   style: const TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textDark,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -157,10 +157,10 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     hintStyle: const TextStyle(color: Color(0xFF77776F)),
                     prefixIcon: const Icon(
                       Icons.person_outline_rounded,
-                      color: AppColors.bronzeLight,
+                      color: AppColors.turquoiseDark,
                     ),
                     filled: true,
-                    fillColor: AppColors.surface,
+                    fillColor: AppColors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(19),
                       borderSide: BorderSide.none,
@@ -168,7 +168,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(19),
                       borderSide: const BorderSide(
-                        color: AppColors.bronze,
+                        color: AppColors.turquoise,
                         width: 1.4,
                       ),
                     ),
@@ -191,8 +191,8 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                   onPressed: valid && !loading ? _createAccount : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.ivory,
-                    foregroundColor: AppColors.charcoal,
-                    disabledBackgroundColor: AppColors.surface,
+                    foregroundColor: AppColors.background,
+                    disabledBackgroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                     ),
@@ -203,7 +203,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
                           height: 23,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
-                            color: AppColors.charcoal,
+                            color: AppColors.background,
                           ),
                         )
                       : const Text(
