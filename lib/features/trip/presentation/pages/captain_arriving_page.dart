@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 import 'active_trip_page.dart';
 
@@ -38,7 +39,7 @@ class CaptainArrivingPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Material(
-                    color: const Color(0xFFFFFBF5),
+                    color: AppColors.white,
                     shape: const CircleBorder(),
                     elevation: 3,
                     child: IconButton(
@@ -51,7 +52,7 @@ class CaptainArrivingPage extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFFBF5),
+                      color: AppColors.white,
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: const [
                         BoxShadow(color: Color(0x22000000), blurRadius: 10)
@@ -93,7 +94,7 @@ class CaptainArrivingPage extends StatelessWidget {
                   icon: vehicleType == 'motorcycle'
                       ? Icons.two_wheeler_rounded
                       : Icons.directions_car_filled_rounded,
-                  color: const Color(0xFF171817),
+                  color: AppColors.navy,
                 ),
               ],
             ),
@@ -122,7 +123,7 @@ class CaptainArrivingPage extends StatelessWidget {
                       width: 38,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD7D0C5),
+                        color: Color(0xFFDCE7EC),
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
@@ -236,7 +237,7 @@ class CaptainArrivingPage extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(13),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF4EFE7),
+                        color: AppColors.surfaceSoft,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Row(
@@ -273,7 +274,7 @@ class CaptainArrivingPage extends StatelessWidget {
                                   const Icon(Icons.chat_bubble_outline_rounded),
                               label: const Text('رسالة'),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF171817),
+                                foregroundColor: AppColors.navy,
                                 side:
                                     const BorderSide(color: Color(0xFFD8D0C5)),
                                 shape: RoundedRectangleBorder(
@@ -292,8 +293,8 @@ class CaptainArrivingPage extends StatelessWidget {
                               icon: const Icon(Icons.call_rounded),
                               label: const Text('اتصال'),
                               style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF171817),
-                                foregroundColor: const Color(0xFFFFFBF5),
+                                backgroundColor: AppColors.navy,
+                                foregroundColor: AppColors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
@@ -323,8 +324,8 @@ class CaptainArrivingPage extends StatelessWidget {
                           );
                         },
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFFB98B52),
-                          foregroundColor: const Color(0xFF171817),
+                          backgroundColor: AppColors.turquoise,
+                          foregroundColor: AppColors.navy,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -360,7 +361,7 @@ class CaptainArrivingPage extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFBF5),
+        backgroundColor: AppColors.white,
         title: const Text('اتصال بالكابتن',
             textDirection: TextDirection.rtl, textAlign: TextAlign.right),
         content: Text(
@@ -381,7 +382,7 @@ class CaptainArrivingPage extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFFFFFBF5),
+      backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(26))),
       builder: (sheetContext) => Padding(
@@ -402,7 +403,7 @@ class CaptainArrivingPage extends StatelessWidget {
               decoration: InputDecoration(
                   hintText: 'اكتب رسالتك...',
                   filled: true,
-                  fillColor: const Color(0xFFF1ECE4),
+                  fillColor: AppColors.surfaceSoft,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none))),
@@ -413,7 +414,7 @@ class CaptainArrivingPage extends StatelessWidget {
               child: FilledButton(
                   onPressed: () => Navigator.pop(sheetContext),
                   style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF171817)),
+                      backgroundColor: AppColors.navy),
                   child: const Text('إرسال'))),
         ]),
       ),
@@ -430,7 +431,7 @@ class CaptainArrivingPage extends StatelessWidget {
     ];
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFFFFFBF5),
+      backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (sheetContext) => SafeArea(
@@ -526,7 +527,7 @@ class _ArrivalMapPainter extends CustomPainter {
     }
 
     final route = Paint()
-      ..color = const Color(0xFFB98B52)
+      ..color = AppColors.turquoise
       ..strokeWidth = 5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
